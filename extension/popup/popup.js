@@ -25,11 +25,42 @@ function getRiskLevel(score) {
   return "No suspicious URL signals";
 }
 
+function renderFindings(container, findings) {
+  container.replaceChildren();
+
+  if (findings.length === 0) {
+    const item = document.createElement("li");
+    item.textContent = "No URL-based findings";
+    container.appendChild(item);
+    return;
+  }
+
+  for (const finding of findings) {
+    const item = document.createElement("li");
+
+    const title = document.createElement("strong");
+    title.textContent =
+      `${finding.id}: ${finding.name} (+${finding.score})`;
+
+    const explanation = document.createElement("p");
+    explanation.textContent = finding.evidence;
+
+    item.appendChild(title);
+    item.appendChild(explanation);
+    container.appendChild(item);
+  }
+}
+
 async function initializeDiver() {
   const urlElement = document.getElementById("current-url");
   const statusElement = document.getElementById("status");
   const scoreElement = document.getElementById("risk-score");
   const findingsElement = document.getElementById("findings");
+
+  urlElement.textContent = "Checking...";
+  statusElement.textContent = "Analyzing...";
+  scoreElement.textContent = "N/A";
+  findingsElement.replaceChildren();
 
   try {
     const tab = await getCurrentTab();
@@ -40,42 +71,27 @@ async function initializeDiver() {
       return;
     }
 
+    urlElement.textContent = tab.url;
+
     const result = analyzeUrl(tab.url);
 
     if (!result.valid) {
-      urlElement.textContent = tab.url;
       statusElement.textContent = "Unable to analyze URL";
       return;
     }
 
-    urlElement.textContent = result.url;
     scoreElement.textContent = `${result.score} / 100`;
     statusElement.textContent = getRiskLevel(result.score);
 
-    findingsElement.innerHTML = "";
-
-    if (result.findings.length === 0) {
-      const item = document.createElement("li");
-      item.textContent = "No URL-based findings";
-      findingsElement.appendChild(item);
-    } else {
-      for (const finding of result.findings) {
-        const item = document.createElement("li");
-
-        item.textContent =
-          `${finding.id}: ${finding.name} (+${finding.score})`;
-
-        findingsElement.appendChild(item);
-      }
-    }
+    renderFindings(findingsElement, result.findings);
 
     console.log("[Diver] Analysis result:", result);
-
   } catch (error) {
     console.error("[Diver] Error:", error);
 
-    urlElement.textContent = "Error";
     statusElement.textContent = "Unable to analyze page";
+    scoreElement.textContent = "N/A";
+    findingsElement.replaceChildren();
   }
 }
 
