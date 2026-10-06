@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diver</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+  <main class="container">
+    <h1>Diver</h1>
+    <p class="subtitle">Phishing Detection</p>
+
+    <section class="status-card">
+<p class="label">Current Page</p>
+<p id="current-url">Checking...</p>
+
+<p class="label">Risk Score</p>
+<p id="risk-score">0 / 100</p>
+
+<p class="label">Status</p>
+<p id="status">Analyzing...</p>
+
+<p class="label">Findings</p>
+<ul id="findings"></ul>
+    </section>
+  </main>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

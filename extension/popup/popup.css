@@ -1,0 +1,58 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+.container {
+  width: 320px;
+  padding: 20px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.subtitle {
+  margin-top: 4px;
+  color: #94a3b8;
+}
+
+.status-card {
+  margin-top: 20px;
+  padding: 16px;
+  background: #1e293b;
+  border-radius: 10px;
+}
+
+.label {
+  margin-bottom: 5px;
+  color: #94a3b8;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+#current-url {
+  word-break: break-all;
+}
+
+#status {
+  margin-bottom: 0;
+}
+
+#risk-score {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#findings {
+  padding-left: 20px;
+  margin-bottom: 0;
+}
+
+#findings li {
+  margin-bottom: 6px;
+  font-size: 13px;
+}

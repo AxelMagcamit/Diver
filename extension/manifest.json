@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Diver",
+  "version": "0.1.0",
+  "description": "An explainable phishing detection browser extension and analysis toolkit.",
+  "permissions": [
+    "activeTab"
+  ],
+  "action": {
+    "default_title": "Diver",
+    "default_popup": "popup/popup.html"
+  }
+}

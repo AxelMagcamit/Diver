@@ -1,0 +1,9 @@
+{
+  "name": "diver",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node evaluation/node/test-engine.js",
+  "evaluate": "node evaluation/node/evaluate.js"
+  }
+}
