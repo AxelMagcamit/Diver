@@ -1,13 +1,25 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { analyzeUrl } from "../../extension/engine/analyzer.js";
 
 async function main() {
-  const inputFile = new URL("./sample-urls.json", import.meta.url);
+  const inputArgument = process.argv[2];
+
+  const inputFile = inputArgument
+    ? pathToFileURL(resolve(inputArgument))
+    : new URL("./sample-urls.json", import.meta.url);
+
   const contents = await readFile(inputFile, "utf8");
   const urls = JSON.parse(contents);
 
-  if (!Array.isArray(urls) || !urls.every(url => typeof url === "string")) {
-    throw new Error("The input file must contain an array of URL strings.");
+  if (
+    !Array.isArray(urls) ||
+    !urls.every(url => typeof url === "string")
+  ) {
+    throw new Error(
+      "The input file must contain an array of URL strings."
+    );
   }
 
   const results = urls.map(url => analyzeUrl(url));
@@ -37,22 +49,23 @@ async function main() {
 
   const report = {
     generatedAt: new Date().toISOString(),
-    inputFile: "evaluation/node/sample-urls.json",
+    inputFile: fileURLToPath(inputFile),
     summary,
     results
   };
 
   const outputDirectory = new URL("../results/", import.meta.url);
-  const outputFile = new URL("sample-report.json", outputDirectory);
+  const outputFile = new URL("latest-report.json", outputDirectory);
 
   await mkdir(outputDirectory, { recursive: true });
+
   await writeFile(
     outputFile,
     JSON.stringify(report, null, 2) + "\n",
     "utf8"
   );
 
-  console.log("\nReport saved to evaluation/results/sample-report.json");
+  console.log("\nReport saved to evaluation/results/latest-report.json");
 }
 
 main().catch(error => {

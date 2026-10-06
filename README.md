@@ -42,22 +42,48 @@ combined scores, invalid input, and URL-length boundaries.
 
 No additional npm packages are required.
 
-## Run the sample evaluation
+## Run the default evaluation
+
+From the project root, run:
 
 ```powershell
 npm run evaluate
 ```
 
-Inputs come from:
+The default input file is:
 
 evaluation/node/sample-urls.json
 
+## Evaluate a different input file
+
+Supply a JSON file containing an array of URL strings:
+
+```powershell
+npm run evaluate -- evaluation/node/extra-urls.json
+```
+
+Relative input paths are resolved from the terminal's current folder.
+For paths containing spaces, wrap the path in double quotes.
+
+The runner analyzes URL strings without visiting websites.
+
+## Evaluation report
+
 The runner displays a table and saves the full results to:
 
-evaluation/results/sample-report.json
+evaluation/results/latest-report.json
 
-Each run replaces the previous report. Generated reports are ignored
-by Git. The runner analyzes URL strings without visiting websites.
+The report includes the generation time, input file path, summary,
+and full analysis results.
+
+Each successful run replaces the previous latest report.
+Generated reports are ignored by Git.
+
+In the table, Valid means the engine could parse and analyze the input.
+It does not mean the website is safe.
+
+Invalid inputs display N/A in the table. Their raw engine results
+retain a score of 0 with valid set to false.
 
 ## Project structure
 
