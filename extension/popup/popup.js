@@ -25,13 +25,17 @@ function getRiskLevel(score) {
   return "No suspicious URL signals";
 }
 
+function showMessage(container, message) {
+  const item = document.createElement("li");
+  item.textContent = message;
+  container.replaceChildren(item);
+}
+
 function renderFindings(container, findings) {
   container.replaceChildren();
 
   if (findings.length === 0) {
-    const item = document.createElement("li");
-    item.textContent = "No URL-based findings";
-    container.appendChild(item);
+    showMessage(container, "No URL-based findings");
     return;
   }
 
@@ -68,15 +72,57 @@ async function initializeDiver() {
     if (!tab || !tab.url) {
       urlElement.textContent = "Unable to read page";
       statusElement.textContent = "Unknown";
+
+      showMessage(
+        findingsElement,
+        "Diver could not read the current tab's URL."
+      );
+
       return;
     }
 
     urlElement.textContent = tab.url;
 
+    let pageUrl;
+
+    try {
+      pageUrl = new URL(tab.url);
+    } catch {
+      statusElement.textContent = "Unable to analyze URL";
+
+      showMessage(
+        findingsElement,
+        "The current tab does not have a valid URL."
+      );
+
+      return;
+    }
+
+    const isWebPage =
+      pageUrl.protocol === "http:" ||
+      pageUrl.protocol === "https:";
+
+    if (!isWebPage) {
+      statusElement.textContent = "Unsupported page";
+
+      showMessage(
+        findingsElement,
+        "Diver's popup analyzes HTTP and HTTPS website URLs only."
+      );
+
+      return;
+    }
+
     const result = analyzeUrl(tab.url);
 
     if (!result.valid) {
       statusElement.textContent = "Unable to analyze URL";
+
+      showMessage(
+        findingsElement,
+        "Diver could not analyze this URL."
+      );
+
       return;
     }
 
@@ -91,7 +137,11 @@ async function initializeDiver() {
 
     statusElement.textContent = "Unable to analyze page";
     scoreElement.textContent = "N/A";
-    findingsElement.replaceChildren();
+
+    showMessage(
+      findingsElement,
+      "Diver could not complete the analysis. Try reopening the popup."
+    );
   }
 }
 
