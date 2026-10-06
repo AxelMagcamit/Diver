@@ -6,27 +6,54 @@
   <title>Diver</title>
   <link rel="stylesheet" href="popup.css">
 </head>
-
 <body>
+  <input class="motion-input" type="checkbox" id="pause-ocean">
+  <div class="ocean" aria-hidden="true">
+    <div class="ocean-light"></div>
+    <div class="ocean-wave wave-one"></div>
+    <div class="ocean-wave wave-two"></div>
+    <div class="bubbles">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+  </div>
+
   <main class="container">
-    <h1>Diver</h1>
-    <p class="subtitle">Phishing Detection</p>
+    <header class="brand-header">
+      <img class="brand-logo" src="../icons/icon-128.png" width="52" height="52" alt="">
+      <div class="brand-copy">
+        <h1>DIVER</h1>
+      </div>
+    </header>
 
-    <section class="status-card">
-<p class="label">Current Page</p>
-<p id="current-url">Checking...</p>
-
-<p class="label">Risk Score</p>
-<p id="risk-score">0 / 100</p>
-
-<p class="label">Status</p>
-<p id="status">Analyzing...</p>
-
-<p class="label">Findings</p>
-<ul id="findings"></ul>
+    <section class="page-card" aria-labelledby="page-label">
+      <h2 class="label" id="page-label">Current page</h2>
+      <p id="current-url">Checking...</p>
     </section>
-  </main>
 
+    <section class="score-card" aria-labelledby="score-label">
+      <div class="score-heading">
+        <h2 class="label" id="score-label">Risk score</h2>
+      </div>
+      <p id="risk-score" aria-live="polite">N/A</p>
+      <div class="status-row">
+        <h2 class="label">Status</h2>
+        <p id="status" role="status">Analyzing...</p>
+      </div>
+    </section>
+
+    <section class="findings-card" aria-labelledby="findings-label">
+      <h2 class="label" id="findings-label">Findings</h2>
+      <ul id="findings"></ul>
+    </section>
+
+    <footer class="popup-footer">
+      <span class="footer-caption">URL ANALYSIS</span>
+      <label class="motion-control" for="pause-ocean">
+        <span class="motion-indicator" aria-hidden="true"></span>
+        Pause ocean motion
+      </label>
+    </footer>
+  </main>
   <script type="module" src="popup.js"></script>
 </body>
 </html>
