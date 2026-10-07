@@ -1,0 +1,5 @@
+FILENAME,URL,label,UnusedFeature
+synthetic-1,"https://example.com/path?a=1,b=2",1,"ignored, quoted field"
+synthetic-2,http://192.0.2.1/login,0,"ignored field with
+a second line"
+synthetic-3,not a valid URL,1,ignored

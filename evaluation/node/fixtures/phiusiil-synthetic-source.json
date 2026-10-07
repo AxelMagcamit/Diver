@@ -1,0 +1,9 @@
+{
+  "kind": "synthetic",
+  "sourceName": "Diver invented CSV fixture",
+  "sourceUrl": "urn:diver:synthetic:phiusiil-import",
+  "license": "Project-authored synthetic test fixture",
+  "retrievedAt": null,
+  "observedAt": null,
+  "csvSha256": "a5a629fb80bce7c9264c6d281424433b82f153fefd4e459355cbaede6b0de3c7"
+}

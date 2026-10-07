@@ -34,13 +34,14 @@ After editing extension files, reload Diver on the extensions page.
 Install Node.js, then open a terminal in the project root:
 
 ```powershell
+npm install
 npm test
 ```
 
 This command runs 22 engine cases covering the five rules, combined scores,
 invalid input, URL-length boundaries, and unsupported protocols, followed by
 10 metrics tests covering known counts, empty inputs, and undefined rates,
-and 9 labeled-workflow tests.
+9 labeled-workflow tests, and 9 CSV-import tests.
 
 You can also run each group separately:
 
@@ -50,7 +51,9 @@ npm run test:metrics
 npm run test:labeled
 ```
 
-No additional npm packages are required.
+The offline import tools use the pinned csv-parse package. Install dependencies
+with npm install (or npm ci for the exact lockfile). The browser extension
+continues to run without npm packages.
 
 ## Run the default evaluation
 
@@ -171,3 +174,12 @@ Unexpected engine errors stop evaluation.
 This synthetic demo does not implement source provenance validation or dataset
 splitting. Those are required before a real quality evaluation, as described in
 docs/evaluation-plan.md.
+
+
+## CSV import preparation
+
+Run `npm run demo:import` to check the importer with three invented records.
+It downloads nothing and does not measure accuracy. See datasets/README.md
+for local folder layout, provenance fields, and the real-file import command.
+The importer is tested against synthetic CSV only; the real source schema
+still needs inspection when the dataset stage begins.

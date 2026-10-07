@@ -1,0 +1,3 @@
+
+# Preserve bytes for the checksummed synthetic CSV fixture.
+evaluation/node/fixtures/phiusiil-synthetic.csv text eol=lf

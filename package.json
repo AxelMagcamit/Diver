@@ -3,12 +3,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "npm run test:engine && npm run test:metrics && npm run test:labeled",
+    "test": "npm run test:engine && npm run test:metrics && npm run test:labeled && npm run test:importer",
     "evaluate": "node evaluation/node/evaluate.js",
     "test:engine": "node evaluation/node/test-engine.js",
     "test:metrics": "node --test evaluation/node/test-metrics.js",
     "demo:metrics": "node evaluation/node/demo-metrics.js",
     "test:labeled": "node --test evaluation/node/test-labeled.js",
-    "demo:labeled": "node evaluation/node/demo-labeled.js"
+    "demo:labeled": "node evaluation/node/demo-labeled.js",
+    "import:phiusiil": "node evaluation/node/import-phiusiil.js",
+    "demo:import": "node evaluation/node/demo-import.js",
+    "test:importer": "node --test evaluation/node/test-importer.js"
+  },
+  "dependencies": {
+    "csv-parse": "7.0.3"
   }
 }
