@@ -27,10 +27,13 @@ async function main() {
   const rows = results.map(result => ({
     URL: result.url,
     Valid: result.valid ? "Yes" : "No",
-    Score: result.valid ? result.score : "N/A",
-    Findings: result.valid
-      ? result.findings.map(finding => finding.id).join(", ") || "None"
-      : "Invalid URL"
+    Supported: result.supported ? "Yes" : "No",
+    Score: result.supported ? result.score : "N/A",
+    Findings: !result.valid
+      ? "Invalid URL"
+      : !result.supported
+        ? "Unsupported protocol"
+        : result.findings.map(finding => finding.id).join(", ") || "None"
   }));
 
   console.table(rows);
@@ -40,11 +43,15 @@ async function main() {
   const summary = {
     totalInputs: results.length,
     validUrls: validCount,
+    supportedUrls: results.filter(result => result.supported).length,
+    unsupportedUrls: results.filter(result => result.valid && !result.supported).length,
     invalidInputs: results.length - validCount
   };
 
   console.log(`Total inputs: ${summary.totalInputs}`);
   console.log(`Valid URLs: ${summary.validUrls}`);
+  console.log(`Supported web URLs: ${summary.supportedUrls}`);
+  console.log(`Unsupported URLs: ${summary.unsupportedUrls}`);
   console.log(`Invalid inputs: ${summary.invalidInputs}`);
 
   const report = {

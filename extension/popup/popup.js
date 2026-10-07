@@ -83,46 +83,17 @@ async function initializeDiver() {
 
     urlElement.textContent = tab.url;
 
-    let pageUrl;
-
-    try {
-      pageUrl = new URL(tab.url);
-    } catch {
-      statusElement.textContent = "Unable to analyze URL";
-
-      showMessage(
-        findingsElement,
-        "The current tab does not have a valid URL."
-      );
-
-      return;
-    }
-
-    const isWebPage =
-      pageUrl.protocol === "http:" ||
-      pageUrl.protocol === "https:";
-
-    if (!isWebPage) {
-      statusElement.textContent = "Unsupported page";
-
-      showMessage(
-        findingsElement,
-        "Diver's popup analyzes HTTP and HTTPS website URLs only."
-      );
-
-      return;
-    }
-
     const result = analyzeUrl(tab.url);
 
     if (!result.valid) {
       statusElement.textContent = "Unable to analyze URL";
+      showMessage(findingsElement, "The current tab does not have a valid URL.");
+      return;
+    }
 
-      showMessage(
-        findingsElement,
-        "Diver could not analyze this URL."
-      );
-
+    if (!result.supported) {
+      statusElement.textContent = "Unsupported page";
+      showMessage(findingsElement, "Diver analyzes HTTP and HTTPS website URLs only.");
       return;
     }
 

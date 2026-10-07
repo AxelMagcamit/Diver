@@ -37,8 +37,8 @@ Install Node.js, then open a terminal in the project root:
 npm test
 ```
 
-The current test set contains 12 cases covering the five rules,
-combined scores, invalid input, and URL-length boundaries.
+The current test set contains 22 cases covering the five rules,
+combined scores, invalid input, URL-length boundaries, and unsupported protocols.
 
 No additional npm packages are required.
 
@@ -79,11 +79,20 @@ and full analysis results.
 Each successful run replaces the previous latest report.
 Generated reports are ignored by Git.
 
-In the table, Valid means the engine could parse and analyze the input.
-It does not mean the website is safe.
+In the table, Valid means the engine could parse the URL. Supported means
+it uses HTTP or HTTPS and can be analyzed. Neither means the website is safe.
 
-Invalid inputs display N/A in the table. Their raw engine results
-retain a score of 0 with valid set to false.
+Invalid and unsupported inputs display N/A and store a null score in JSON.
+Unsupported URLs remain valid URLs, but have supported set to false and no findings.
+The summary separates supported URLs, unsupported URLs, and invalid inputs.
+
+Run the mixed-protocol example with:
+
+```powershell
+npm run evaluate -- evaluation/node/protocol-urls.json
+```
+
+The popup and evaluator both use the shared engine's support decision.
 
 ## Project structure
 

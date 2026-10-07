@@ -1,37 +1,39 @@
 import { analyzeUrlStructure } from "./rules/url-structure.js";
 
 export function analyzeUrl(rawUrl) {
+  let url;
+
   try {
-    const url = new URL(rawUrl);
-
-    const findings = [
-      ...analyzeUrlStructure(url)
-    ];
-
-    const score = Math.min(
-      findings.reduce((total, finding) => total + finding.score, 0),
-      100
-    );
-
-    return {
-      valid: true,
-      url: rawUrl,
-      hostname: url.hostname,
-      protocol: url.protocol,
-      isHttps: url.protocol === "https:",
-      score,
-      findings
-    };
-
-  } catch (error) {
+    if (typeof rawUrl !== "string") {
+      throw new TypeError("Expected a URL string.");
+    }
+    url = new URL(rawUrl);
+  } catch {
     return {
       valid: false,
+      supported: false,
       url: rawUrl,
       hostname: null,
       protocol: null,
       isHttps: false,
-      score: 0,
+      score: null,
       findings: []
     };
   }
+
+  const supported = url.protocol === "http:" || url.protocol === "https:";
+  const findings = supported ? analyzeUrlStructure(url) : [];
+
+  return {
+    valid: true,
+    supported,
+    url: rawUrl,
+    hostname: url.hostname,
+    protocol: url.protocol,
+    isHttps: url.protocol === "https:",
+    score: supported
+      ? Math.min(findings.reduce((total, finding) => total + finding.score, 0), 100)
+      : null,
+    findings
+  };
 }

@@ -55,7 +55,7 @@ const tests = [
     name: "Invalid URL",
     url: "not a valid URL",
     valid: false,
-    score: 0,
+    score: null,
     ruleIds: []
   },
     {
@@ -92,6 +92,87 @@ const tests = [
     score: 20,
     ruleIds: ["URL-004"]
   }
+,
+{
+  "name": "Chrome internal page",
+  "url": "chrome://extensions/",
+  "valid": true,
+  "supported": false,
+  "score": null,
+  "ruleIds": []
+},
+{
+  "name": "Local file",
+  "url": "file:///C:/example.html",
+  "valid": true,
+  "supported": false,
+  "score": null,
+  "ruleIds": []
+},
+{
+  "name": "Email link",
+  "url": "mailto:user@example.com",
+  "valid": true,
+  "supported": false,
+  "score": null,
+  "ruleIds": []
+},
+{
+  "name": "Script URL",
+  "url": "javascript:void(0)",
+  "valid": true,
+  "supported": false,
+  "score": null,
+  "ruleIds": []
+},
+{
+  "name": "Embedded data URL",
+  "url": "data:text/plain,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "valid": true,
+  "supported": false,
+  "score": null,
+  "ruleIds": []
+},
+{
+  "name": "FTP with IP and credentials",
+  "url": "ftp://user:pass@192.0.2.1/",
+  "valid": true,
+  "supported": false,
+  "score": null,
+  "ruleIds": []
+},
+{
+  "name": "Blank browser page",
+  "url": "about:blank",
+  "valid": true,
+  "supported": false,
+  "score": null,
+  "ruleIds": []
+},
+{
+  "name": "Browser extension page",
+  "url": "chrome-extension://abcdefghijklmnop/popup.html",
+  "valid": true,
+  "supported": false,
+  "score": null,
+  "ruleIds": []
+},
+{
+  "name": "Empty input",
+  "url": "",
+  "valid": false,
+  "supported": false,
+  "score": null,
+  "ruleIds": []
+},
+{
+  "name": "Non-string input",
+  "url": 42,
+  "valid": false,
+  "supported": false,
+  "score": null,
+  "ruleIds": []
+}
 ];
 
 let passed = 0;
@@ -101,6 +182,7 @@ for (const test of tests) {
     const result = analyzeUrl(test.url);
 
     assert.equal(result.valid, test.valid, "Unexpected validity");
+    assert.equal(result.supported, test.supported ?? test.valid, "Unexpected support status");
     assert.equal(result.score, test.score, "Unexpected score");
     assert.deepEqual(
       result.findings.map(finding => finding.id).sort(),
