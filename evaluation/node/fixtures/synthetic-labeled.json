@@ -1,0 +1,19 @@
+{
+  "kind": "synthetic",
+  "description": "Invented labels for testing the evaluation workflow. These are not verified phishing or legitimate classifications.",
+  "records": [
+    { "url": "http://192.0.2.1/one", "label": "phishing" },
+    { "url": "http://user:pass@example.com/", "label": "phishing" },
+    { "url": "https://example.com/assigned-phishing", "label": "phishing" },
+    { "url": "http://192.0.2.2/login", "label": "legitimate" },
+    { "url": "https://example.org/", "label": "legitimate" },
+    { "url": "http://example.org/", "label": "legitimate" },
+    { "url": "chrome://extensions/", "label": "legitimate" },
+    { "url": "mailto:user@example.com", "label": "phishing" },
+    { "url": "not a valid URL", "label": "phishing" },
+    { "url": "https://example.net/unknown", "label": null },
+    { "url": "https://example.org/", "label": "legitimate" },
+    { "url": "https://example.net/conflict", "label": "phishing" },
+    { "url": "https://example.net/conflict", "label": "legitimate" }
+  ]
+}

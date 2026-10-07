@@ -37,8 +37,18 @@ Install Node.js, then open a terminal in the project root:
 npm test
 ```
 
-The current test set contains 22 cases covering the five rules,
-combined scores, invalid input, URL-length boundaries, and unsupported protocols.
+This command runs 22 engine cases covering the five rules, combined scores,
+invalid input, URL-length boundaries, and unsupported protocols, followed by
+10 metrics tests covering known counts, empty inputs, and undefined rates,
+and 9 labeled-workflow tests.
+
+You can also run each group separately:
+
+```powershell
+npm run test:engine
+npm run test:metrics
+npm run test:labeled
+```
 
 No additional npm packages are required.
 
@@ -106,3 +116,58 @@ The popup and evaluator both use the shared engine's support decision.
 The sample evaluation checks engine behavior; it does not measure
 phishing detection accuracy. No labeled dataset evaluation has been
 performed yet.
+
+## Synthetic metrics demonstration
+
+```powershell
+npm run demo:metrics
+```
+
+This demonstrates precision, recall, false-positive rate, F1, and accuracy using
+invented outcome counts. It does not analyze URLs, run the detection engine,
+write an evaluation report, or measure Diver's phishing detection accuracy.
+
+The calculator is in evaluation/node/metrics.js. Supply non-negative integer
+counts named tp, fp, fn, and tn. It returns unrounded rates from 0 to 1 and null
+when a denominator is zero. The demo formats rates as percentages and null as N/A.
+Only independently labeled, eligible results should feed a future real evaluation;
+coverage, exclusion counts, and threshold metadata belong in that future runner.
+See docs/evaluation-plan.md for the evaluation protocol.
+
+## Synthetic labeled workflow
+
+```powershell
+npm run demo:labeled
+```
+
+This runs the shared engine on example URLs paired with deliberately invented
+labels, applies the default threshold of 30, and calculates outcome counts and
+metrics. It verifies the workflow, not real phishing accuracy. No websites are
+visited or datasets downloaded. The fixture is in
+evaluation/node/fixtures/synthetic-labeled.json.
+
+At threshold 30 it has 13 input records, 6 evaluated records, and 7 exclusions.
+Expected counts: TP=2, FP=1, FN=1, TN=2. These are synthetic demonstration results.
+
+An optional integer threshold from 0 to 100 changes this demo only:
+
+```powershell
+npm run demo:labeled -- 40
+```
+
+Results are saved separately to evaluation/results/synthetic-labeled-report.json,
+marked synthetic. Each successful demo run replaces that synthetic report; the
+ordinary latest-report.json is untouched.
+
+The reusable evaluator accepts records with URL strings and labels. Only exact
+lowercase phishing and legitimate labels are recognized. Missing or other string
+labels are excluded. It preserves the original URL and any extra record metadata.
+Conflicting known labels quarantine all records for that exact URL. Otherwise,
+exact URL duplicates are removed, preferring a known label over an unknown label.
+Each remaining record is checked for invalid URL, unsupported protocol, then
+unknown label, in that order. Every input belongs to one outcome or one exclusion.
+Unexpected engine errors stop evaluation.
+
+This synthetic demo does not implement source provenance validation or dataset
+splitting. Those are required before a real quality evaluation, as described in
+docs/evaluation-plan.md.

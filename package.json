@@ -3,7 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node evaluation/node/test-engine.js",
-  "evaluate": "node evaluation/node/evaluate.js"
+    "test": "npm run test:engine && npm run test:metrics && npm run test:labeled",
+    "evaluate": "node evaluation/node/evaluate.js",
+    "test:engine": "node evaluation/node/test-engine.js",
+    "test:metrics": "node --test evaluation/node/test-metrics.js",
+    "demo:metrics": "node evaluation/node/demo-metrics.js",
+    "test:labeled": "node --test evaluation/node/test-labeled.js",
+    "demo:labeled": "node evaluation/node/demo-labeled.js"
   }
 }
