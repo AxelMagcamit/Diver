@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "npm run test:engine && npm run test:metrics && npm run test:labeled && npm run test:importer",
+    "test": "npm run test:engine && npm run test:metrics && npm run test:labeled && npm run test:importer && npm run test:split && npm run test:development && npm run test:thresholds && npm run test:benign-pilot",
     "evaluate": "node evaluation/node/evaluate.js",
     "test:engine": "node evaluation/node/test-engine.js",
     "test:metrics": "node --test evaluation/node/test-metrics.js",
@@ -12,9 +12,20 @@
     "demo:labeled": "node evaluation/node/demo-labeled.js",
     "import:phiusiil": "node evaluation/node/import-phiusiil.js",
     "demo:import": "node evaluation/node/demo-import.js",
-    "test:importer": "node --test evaluation/node/test-importer.js"
+    "test:importer": "node --test evaluation/node/test-importer.js",
+    "test:split": "node --test evaluation/node/test-domain-split.js",
+    "split:dataset": "node evaluation/node/split-dataset.js",
+    "test:development": "node --test evaluation/node/test-development.js",
+    "evaluate:development": "node evaluation/node/evaluate-development.js",
+    "test:thresholds": "node --test evaluation/node/test-thresholds.js",
+    "compare:thresholds": "node evaluation/node/compare-thresholds.js",
+    "audit:development": "node evaluation/node/audit-development.js",
+    "demo:challenges": "node evaluation/node/demo-challenges.js",
+    "test:benign-pilot": "node --test evaluation/node/test-benign-pilot.js",
+    "evaluate:benign-pilot": "node evaluation/node/evaluate-benign-pilot.js"
   },
   "dependencies": {
-    "csv-parse": "7.0.3"
+    "csv-parse": "7.0.3",
+    "tldts": "7.4.16"
   }
 }

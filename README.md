@@ -181,5 +181,64 @@ docs/evaluation-plan.md.
 Run `npm run demo:import` to check the importer with three invented records.
 It downloads nothing and does not measure accuracy. See datasets/README.md
 for local folder layout, provenance fields, and the real-file import command.
-The importer is tested against synthetic CSV only; the real source schema
-still needs inspection when the dataset stage begins.
+The importer has also processed the original PhiUSIIL CSV after schema and label
+mapping inspection. See docs/phiusiil-import-checkpoint.md for the import audit.
+
+## Domain-separated split
+
+Run `npm run test:split` to verify domain grouping and deterministic partitioning.
+To reproduce the split into a NEW output directory:
+
+```powershell
+npm run split:dataset -- datasets/processed/phiusiil.json datasets/processed/phiusiil-split-v1
+```
+
+The command refuses an existing output directory. It produces development.json,
+holdout.json, exclusions.json, and manifest.json. No detection scores are computed.
+The fixed seed assigns whole domain groups to approximately 80% development and
+20% holdout. See docs/phiusiil-split-checkpoint.md for counts and limitations.
+
+## Development baseline
+
+Run `npm run evaluate:development` to evaluate the fixed development partition at
+threshold 30 using the shared engine. The command verifies the input checksum
+against the split manifest and accepts no alternative input or threshold.
+Each run saves a timestamped report in evaluation/results/, including all outcomes,
+source provenance and implementation hashes. No websites are visited.
+See docs/development-baseline.md for the first results and their limitations.
+
+Compare the six planned thresholds using a saved development report:
+
+```powershell
+npm run compare:thresholds -- evaluation/results/development-baseline-2026-10-08T03-35-35-971Z.json
+```
+
+This reuses saved scores and makes no popup changes. See
+docs/development-thresholds.md for the comparison and score distribution.
+
+Audit URL shapes and fixed samples offline:
+
+```powershell
+npm run audit:development -- evaluation/results/development-baseline-2026-10-08T03-35-35-971Z.json
+```
+
+See docs/development-audit.md. The legitimate development examples are exclusively
+HTTPS www homepages; their zero false alarms do not represent ordinary browsing.
+
+## Synthetic limitation challenges
+
+Run `npm run demo:challenges` to check ten invented scenarios against the shared
+engine. The demo illustrates possible false alerts and missed threats, including
+identical URLs with different imagined page content. It measures no real-world
+accuracy and visits no websites. See docs/synthetic-challenges.md.
+
+## Benign pilot audit
+
+Run `npm run evaluate:benign-pilot` after preparing the pinned PhreshPhish pilot.
+It checks URL shapes, exclusions, development-domain overlap and false alerts at
+six thresholds. It does not estimate precision or recall or inspect holdout data.
+See docs/benign-pilot-results.md for results and limitations.
+
+For the expanded ten-shard pilot, run
+`npm run evaluate:benign-pilot -- --expanded`.
+See docs/benign-multishard-results.md for sampling, reproduction and limitations.

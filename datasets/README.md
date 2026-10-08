@@ -51,3 +51,12 @@ Before reporting real accuracy: inspect the source schema and label provenance,
 audit exclusions and class patterns, and create reproducible domain-separated
 development and holdout splits. See docs/evaluation-plan.md and
 docs/data-source-review.md. No splitting is performed by this importer.
+
+The separate `npm run split:dataset -- input.json new-output-directory` command
+now creates reproducible development and holdout files. The destination's parent
+directory must exist. Exact URL duplicates are excluded; contradictory known
+labels are quarantined. Registrable domains use tldts with private suffixes
+enabled; canonical IP addresses and hostname fallbacks form their own groups.
+The manifest preserves source provenance, hashes, settings and exclusion counts.
+All generated dataset files remain local under datasets/processed/ and ignored
+by Git. See docs/phiusiil-split-checkpoint.md. Holdout is reserved for final testing.

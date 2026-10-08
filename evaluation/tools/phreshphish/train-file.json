@@ -1,0 +1,12 @@
+{
+  "type": "file",
+  "oid": "ef2512ca88e0e7fc2a1e9f57cbbd822ffd75f51b",
+  "size": 49639686,
+  "lfs": {
+    "oid": "9a9c693a95daeddb127c4446df4c5673b3f1a39e457ffe964b9849069bd739fe",
+    "size": 49639686,
+    "pointerSize": 133
+  },
+  "xetHash": "314b0802f4c8b2a069d2a0d74e68fc14cc0bc22751a390e01c2186650c7cdaa1",
+  "path": "data/train-000.parquet"
+}
