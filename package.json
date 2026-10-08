@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "npm run test:engine && npm run test:metrics && npm run test:labeled && npm run test:importer && npm run test:split && npm run test:development && npm run test:thresholds && npm run test:benign-pilot && npm run test:candidate-path && npm run test:candidate-domain && npm run test:site-identity",
+    "test": "npm run test:engine && npm run test:metrics && npm run test:labeled && npm run test:importer && npm run test:split && npm run test:development && npm run test:thresholds && npm run test:benign-pilot && npm run test:candidate-path && npm run test:candidate-domain && npm run test:site-identity && npm run test:forms",
     "evaluate": "node evaluation/node/evaluate.js",
     "test:engine": "node evaluation/node/test-engine.js",
     "test:metrics": "node --test evaluation/node/test-metrics.js",
