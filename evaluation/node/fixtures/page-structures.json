@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "source": "synthetic",
+  "records": [
+    {
+      "id": "same-site-https",
+      "inspectionStatus": "available",
+      "snapshot": {
+        "pageUrl": "https://portal.example.com/login",
+        "baseUrl": "https://portal.example.com/login",
+        "unassociatedPasswordFields": 0,
+        "forms": [{ "hasPasswordField": true, "action": "/session", "method": "post", "submitterActions": [] }]
+      }
+    },
+    {
+      "id": "external-http",
+      "inspectionStatus": "available",
+      "snapshot": {
+        "pageUrl": "https://portal.example.com/login",
+        "baseUrl": "https://portal.example.com/login",
+        "unassociatedPasswordFields": 0,
+        "forms": [{ "hasPasswordField": true, "action": "http://collector.example.net/session", "method": "post", "submitterActions": [] }]
+      }
+    },
+    {
+      "id": "external-button-override",
+      "inspectionStatus": "available",
+      "snapshot": {
+        "pageUrl": "https://portal.example.com/login",
+        "baseUrl": "https://portal.example.com/login",
+        "unassociatedPasswordFields": 0,
+        "forms": [{
+          "hasPasswordField": true,
+          "action": "/session",
+          "method": "post",
+          "submitterActions": [{ "action": "https://identity.example.org/session", "method": null, "disabled": false }]
+        }]
+      }
+    },
+    {
+      "id": "no-password-forms",
+      "inspectionStatus": "available",
+      "snapshot": {
+        "pageUrl": "https://portal.example.com/",
+        "baseUrl": "https://portal.example.com/",
+        "unassociatedPasswordFields": 0,
+        "forms": []
+      }
+    },
+    {
+      "id": "unassociated-field",
+      "inspectionStatus": "available",
+      "snapshot": {
+        "pageUrl": "https://portal.example.com/login",
+        "baseUrl": "https://portal.example.com/login",
+        "unassociatedPasswordFields": 1,
+        "forms": []
+      }
+    },
+    {
+      "id": "restricted-page",
+      "inspectionStatus": "unavailable",
+      "reason": "restricted-page"
+    }
+  ]
+}
