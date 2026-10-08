@@ -192,4 +192,8 @@ h1 { font-family: "Segoe UI", Arial, sans-serif; font-size: 29px; letter-spacing
   .motion-input { display: none; }
 }
 
-
+#score-explanation {
+  margin: 0 0 14px;
+  max-width: 100%;
+  line-height: 1.6;
+}
