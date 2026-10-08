@@ -144,6 +144,9 @@ h1 { font-family: "Segoe UI", Arial, sans-serif; font-size: 29px; letter-spacing
 #current-url { font-size: 12px; line-height: 1.6; margin: 8px 0 0; overflow-wrap: anywhere; max-height: 76px; overflow-y: auto; scrollbar-width: thin; }
 
 .score-card { margin-top: 12px; border-color: #527dbb55; background: linear-gradient(125deg, #142a48f5, #0b1828f5 80%); }
+.site-identity { margin-top: 12px; padding-top: 12px; border-top: 1px solid #9bb9d226; }
+#site-domain { margin: 5px 0; font-size: 17px; font-weight: 650; line-height: 1.4; color: #d6e7ff; overflow-wrap: anywhere; unicode-bidi: isolate; }
+.domain-note { margin: 0; color: #aab9c9; font-size: 10px; line-height: 1.5; }
 .score-heading { display: flex; align-items: center; justify-content: space-between; }
 #risk-score { font-size: 38px; font-weight: 650; letter-spacing: -1.5px; line-height: 1.2; margin: 12px 0 15px; font-variant-numeric: tabular-nums; }
 .status-row { border-top: 1px solid #ffffff12; padding-top: 12px; }
@@ -188,6 +191,5 @@ h1 { font-family: "Segoe UI", Arial, sans-serif; font-size: 29px; letter-spacing
   .motion-control { display: none; }
   .motion-input { display: none; }
 }
-
 
 

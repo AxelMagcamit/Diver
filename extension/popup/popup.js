@@ -1,4 +1,5 @@
 import { analyzeUrl } from "../engine/analyzer.js";
+import { getSiteIdentity } from "../engine/site-identity.js";
 
 async function getCurrentTab() {
   const tabs = await chrome.tabs.query({
@@ -60,6 +61,8 @@ async function initializeDiver() {
   const statusElement = document.getElementById("status");
   const scoreElement = document.getElementById("risk-score");
   const findingsElement = document.getElementById("findings");
+  const identityElement = document.getElementById("site-identity");
+  identityElement.hidden = true;
 
   urlElement.textContent = "Checking...";
   statusElement.textContent = "Analyzing...";
@@ -97,6 +100,12 @@ async function initializeDiver() {
       return;
     }
 
+    const identity = getSiteIdentity(tab.url);
+    if (identity) {
+      document.getElementById("site-domain-label").textContent = identity.label;
+      document.getElementById("site-domain").textContent = identity.value;
+      identityElement.hidden = false;
+    }
     scoreElement.textContent = `${result.score} / 100`;
     statusElement.textContent = getRiskLevel(result.score);
 
@@ -104,6 +113,7 @@ async function initializeDiver() {
 
     console.log("[Diver] Analysis result:", result);
   } catch (error) {
+    identityElement.hidden = true;
     console.error("[Diver] Error:", error);
 
     statusElement.textContent = "Unable to analyze page";
