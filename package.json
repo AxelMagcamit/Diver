@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "npm run test:engine && npm run test:metrics && npm run test:labeled && npm run test:importer && npm run test:split && npm run test:development && npm run test:thresholds && npm run test:benign-pilot",
+    "test": "npm run test:engine && npm run test:metrics && npm run test:labeled && npm run test:importer && npm run test:split && npm run test:development && npm run test:thresholds && npm run test:benign-pilot && npm run test:candidate-path && npm run test:candidate-domain",
     "evaluate": "node evaluation/node/evaluate.js",
     "test:engine": "node evaluation/node/test-engine.js",
     "test:metrics": "node --test evaluation/node/test-metrics.js",
@@ -22,7 +22,11 @@
     "audit:development": "node evaluation/node/audit-development.js",
     "demo:challenges": "node evaluation/node/demo-challenges.js",
     "test:benign-pilot": "node --test evaluation/node/test-benign-pilot.js",
-    "evaluate:benign-pilot": "node evaluation/node/evaluate-benign-pilot.js"
+    "evaluate:benign-pilot": "node evaluation/node/evaluate-benign-pilot.js",
+    "test:candidate-path": "node --test evaluation/node/test-candidate-path.js",
+    "experiment:path-signal": "node evaluation/node/experiment-path-signal.js",
+    "test:candidate-domain": "node --test evaluation/node/test-candidate-domain.js",
+    "experiment:domain-signal": "node evaluation/node/experiment-domain-signal.js"
   },
   "dependencies": {
     "csv-parse": "7.0.3",
