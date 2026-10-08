@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Diver Form Collector Tests</title>
+  <style>
+    body {
+      max-width: 850px;
+      margin: 40px auto;
+      padding: 0 20px;
+      font-family: system-ui, sans-serif;
+      line-height: 1.6;
+    }
+
+    pre {
+      padding: 20px;
+      background: #eef3f8;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diver Form Collector Tests</h1>
+  <p>
+    Local structure checks only. No forms are submitted.
+  </p>
+
+  <pre id="results">Running...</pre>
+  <div id="fixture" hidden></div>
+
+  <script type="module">
+    import {
+      collectPasswordForms
+    } from "/form-collector.js";
+
+    const fixture = document.getElementById("fixture");
+    const output = document.getElementById("results");
+
+    const lines = [];
+    let passed = 0;
+    let failed = 0;
+
+    // Prevent accidental native submission on this test page.
+    document.addEventListener(
+      "submit",
+      event => event.preventDefault(),
+      true
+    );
+
+    function check(condition, message) {
+      if (!condition) {
+        throw new Error(message);
+      }
+    }
+
+    function run(name, markup, verify) {
+      fixture.innerHTML = markup;
+
+      try {
+        verify();
+        passed++;
+        lines.push(`PASS: ${name}`);
+      } catch (error) {
+        failed++;
+        lines.push(`FAIL: ${name} — ${error.message}`);
+      } finally {
+        fixture.replaceChildren();
+      }
+    }
+
+    run(
+      "Collects password form structure",
+      `
+        <form action="/session" method="post">
+          <input type="password">
+        </form>
+      `,
+      () => {
+        const result = collectPasswordForms();
+
+        check(result.forms.length === 1, "Expected one form");
+        check(
+          result.forms[0].hasPasswordField === true,
+          "Password field was not detected"
+        );
+        check(
+          result.forms[0].action === "/session",
+          "Declared action was not preserved"
+        );
+        check(
+          result.forms[0].method === "post",
+          "Expected POST"
+        );
+      }
+    );
+
+    run(
+      "Recognizes password fields outside their form",
+      `
+        <form id="account" action="/session"></form>
+        <input type="password" form="account">
+      `,
+      () => {
+        const result = collectPasswordForms();
+
+        check(
+          result.forms[0].hasPasswordField === true,
+          "External associated field was missed"
+        );
+      }
+    );
+
+    run(
+      "Collects external submit-button overrides",
+      `
+        <form id="account" action="/session">
+          <input type="password">
+        </form>
+
+        <button
+          type="submit"
+          form="account"
+          formaction="https://identity.example.org/session"
+          formmethod="post"
+        >
+          Continue
+        </button>
+      `,
+      () => {
+        const result = collectPasswordForms();
+        const overrides = result.forms[0].submitterActions;
+
+        check(overrides.length === 1, "Expected one override");
+        check(
+          overrides[0].action ===
+            "https://identity.example.org/session",
+          "Destination override was missed"
+        );
+        check(
+          overrides[0].method === "post",
+          "Method override was missed"
+        );
+      }
+    );
+
+    run(
+      "Detects password fields without an associated form",
+      `<input type="password">`,
+      () => {
+        const result = collectPasswordForms();
+
+        check(result.forms.length === 0, "Unexpected form");
+        check(
+          result.unassociatedPasswordFields === 1,
+          "Unassociated field was missed"
+        );
+      }
+    );
+
+    run(
+      "Does not read field values",
+      `
+        <form action="/session">
+          <input type="text">
+          <input type="password">
+        </form>
+      `,
+      () => {
+        for (const input of fixture.querySelectorAll("input")) {
+          Object.defineProperty(input, "value", {
+            configurable: true,
+            get() {
+              throw new Error("A field value was accessed");
+            }
+          });
+        }
+
+        const result = collectPasswordForms();
+
+        check(
+          result.forms[0].hasPasswordField === true,
+          "Collection did not complete"
+        );
+        check(
+          !Object.hasOwn(result.forms[0], "value"),
+          "Unexpected value field"
+        );
+      }
+    );
+
+    run(
+      "Preserves missing and empty actions separately",
+      `
+        <form>
+          <input type="password">
+        </form>
+        <form action="">
+          <input type="password">
+        </form>
+      `,
+      () => {
+        const result = collectPasswordForms();
+
+        check(
+          result.forms[0].action === null,
+          "Missing action should be null"
+        );
+        check(
+          result.forms[1].action === "",
+          "Empty action should remain empty"
+        );
+      }
+    );
+
+    run(
+      "Handles image submitters and ignores ordinary buttons",
+      `
+        <form action="/session">
+          <input type="password">
+
+          <fieldset disabled>
+            <input
+              type="image"
+              alt="Submit"
+              formaction="/alternate"
+            >
+          </fieldset>
+
+          <button type="button" formaction="/ignored">
+            Ordinary button
+          </button>
+        </form>
+      `,
+      () => {
+        const result = collectPasswordForms();
+        const overrides = result.forms[0].submitterActions;
+
+        check(overrides.length === 1, "Wrong override count");
+        check(
+          overrides[0].action === "/alternate",
+          "Image submitter was missed"
+        );
+        check(
+          overrides[0].disabled === true,
+          "Disabled fieldset was not recognized"
+        );
+      }
+    );
+
+    lines.push("");
+    lines.push(`${passed}/${passed + failed} checks passed.`);
+    output.textContent = lines.join("\n");
+    document.title = failed
+      ? "FAIL — Diver Collector Tests"
+      : "PASS — Diver Collector Tests";
+  </script>
+</body>
+</html>

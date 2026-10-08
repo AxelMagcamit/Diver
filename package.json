@@ -27,7 +27,8 @@
     "experiment:path-signal": "node evaluation/node/experiment-path-signal.js",
     "test:candidate-domain": "node --test evaluation/node/test-candidate-domain.js",
     "experiment:domain-signal": "node evaluation/node/experiment-domain-signal.js",
-    "test:site-identity": "node --test evaluation/node/test-site-identity.js"
+    "test:site-identity": "node --test evaluation/node/test-site-identity.js",
+    "test:forms": "node --test evaluation/node/test-form-analyzer.js evaluation/node/test-form-overrides.js"
   },
   "dependencies": {
     "csv-parse": "7.0.3",

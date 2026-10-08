@@ -198,3 +198,15 @@ h1 { font-family: "Segoe UI", Arial, sans-serif; font-size: 29px; letter-spacing
   line-height: 1.6;
 }
 
+
+/* Page findings use the existing popup style. */
+.form-check {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(162, 188, 210, 0.14);
+}
+#form-status { margin: 8px 0; font-size: 13px; line-height: 1.5; }
+#form-findings { padding-left: 18px; margin: 10px 0; font-size: 13px; line-height: 1.5; }
+#form-findings:empty { display: none; }
+#form-findings li + li { margin-top: 14px; }
+#form-findings p { margin: 6px 0 0; }

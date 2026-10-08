@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diver — Popup Form Checks</title>
+
+  <style>
+    body {
+      max-width: 760px;
+      margin: 48px auto;
+      padding: 0 24px;
+      font: 17px/1.6 system-ui, sans-serif;
+      color: #132438;
+    }
+
+    select,
+    input,
+    button {
+      display: block;
+      margin: 12px 0;
+      padding: 10px;
+      font: inherit;
+    }
+
+    .panel {
+      margin-top: 24px;
+      padding: 24px;
+      background: #edf3f8;
+      border-radius: 12px;
+    }
+
+    #expected {
+      padding: 16px;
+      background: #eef7ee;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Diver popup form checks</h1>
+
+  <p>
+    Select a case, then close and reopen Diver.
+    Leave all password fields empty.
+    Normal form submission is prevented.
+  </p>
+
+  <label for="test-case">Test case</label>
+
+  <select id="test-case">
+    <option value="no-forms">1. No password forms</option>
+    <option value="same-site">2. Same-site HTTPS destination</option>
+    <option value="cross-site">3. External HTTPS destination</option>
+  </select>
+
+  <p id="expected" role="status"></p>
+  <div id="fixture" class="panel"></div>
+
+  <script>
+    const selector = document.getElementById("test-case");
+    const fixture = document.getElementById("fixture");
+    const expected = document.getElementById("expected");
+
+    // Prevent normal submissions for every dynamically created form.
+    document.addEventListener("submit", event => {
+      event.preventDefault();
+    }, true);
+
+    function createPasswordForm(action) {
+      const form = document.createElement("form");
+      form.method = "post";
+      form.action = action;
+
+      const label = document.createElement("label");
+      label.htmlFor = "demo-password";
+      label.textContent = "Demo password field — leave empty";
+
+      const input = document.createElement("input");
+      input.id = "demo-password";
+      input.type = "password";
+      input.autocomplete = "off";
+
+      const button = document.createElement("button");
+      button.type = "submit";
+      button.textContent = "Demo submit — submission prevented";
+
+      form.append(label, input, button);
+      fixture.append(form);
+    }
+
+    function renderCase() {
+      fixture.replaceChildren();
+
+      if (selector.value === "no-forms") {
+        const message = document.createElement("p");
+        message.textContent = "This case contains no forms or password fields.";
+        fixture.append(message);
+
+        expected.textContent =
+          "Expected: No password forms found in this document.";
+        return;
+      }
+
+      if (selector.value === "same-site") {
+        // Declare HTTPS on the same hostname.
+        // No HTTPS server is required because nothing is submitted.
+        const destination = new URL(location.href);
+        destination.protocol = "https:";
+        destination.port = "";
+        destination.pathname = "/session";
+        destination.search = "";
+        destination.hash = "";
+
+        createPasswordForm(destination.href);
+
+        expected.textContent =
+          "Expected: 1 password form inspected. " +
+          "No destination findings in the declared form actions.";
+        return;
+      }
+
+      createPasswordForm("https://identity.example.org/session");
+
+      expected.textContent =
+        "Expected: 1 password form inspected. " +
+        "FORM-CROSS-SITE only; no FORM-HTTP.";
+    }
+
+    selector.addEventListener("change", renderCase);
+    renderCase();
+  </script>
+</body>
+</html>

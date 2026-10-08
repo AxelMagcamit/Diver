@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Diver Form Integration Tests</title>
+  <style>
+    body {
+      max-width: 850px;
+      margin: 40px auto;
+      padding: 0 20px;
+      font-family: system-ui, sans-serif;
+      line-height: 1.6;
+    }
+
+    pre {
+      padding: 20px;
+      background: #eef3f8;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diver Form Integration Tests</h1>
+
+  <p>
+    Collect form structure → analyze destinations.
+    No forms are submitted.
+  </p>
+
+  <pre id="results">Running...</pre>
+  <div id="fixture" hidden></div>
+
+  <script type="module">
+    import {
+      collectPasswordForms
+    } from "/extension/engine/form-collector.js";
+
+    import {
+      analyzePasswordForms
+    } from "/extension/engine/form-analyzer.js";
+
+    const fixture = document.getElementById("fixture");
+    const output = document.getElementById("results");
+
+    const lines = [];
+    let passed = 0;
+    let failed = 0;
+
+    document.addEventListener(
+      "submit",
+      event => event.preventDefault(),
+      true
+    );
+
+    function check(condition, message) {
+      if (!condition) {
+        throw new Error(message);
+      }
+    }
+
+    function analyzeCurrentDocument() {
+      const snapshot = collectPasswordForms(document);
+
+      return {
+        snapshot,
+        analysis: analyzePasswordForms(
+          snapshot.pageUrl,
+          snapshot.forms,
+          { baseUrl: snapshot.baseUrl }
+        )
+      };
+    }
+
+    function run(name, markup, verify) {
+      fixture.innerHTML = markup;
+
+      try {
+        verify();
+        passed++;
+        lines.push(`PASS: ${name}`);
+      } catch (error) {
+        failed++;
+        lines.push(`FAIL: ${name} — ${error.message}`);
+      } finally {
+        fixture.replaceChildren();
+      }
+    }
+
+    run(
+      "Relative action remains on the local site",
+      `
+        <form action="/session" method="post">
+          <input type="password">
+        </form>
+      `,
+      () => {
+        const { analysis } = analyzeCurrentDocument();
+        const form = analysis.results[0];
+
+        check(analysis.passwordForms === 1, "Expected one password form");
+        check(form.relationship === "same-site", "Expected same-site");
+        check(form.method === "post", "Expected POST");
+
+        // Our local test server uses HTTP.
+        check(
+          form.findings.some(item => item.id === "FORM-HTTP"),
+          "Expected the declared HTTP destination finding"
+        );
+      }
+    );
+
+    run(
+      "Button override reveals an external destination",
+      `
+        <form action="/session" method="post">
+          <input type="password">
+          <button
+            type="submit"
+            formaction="https://identity.example.org/session"
+          >
+            Continue
+          </button>
+        </form>
+      `,
+      () => {
+        const { analysis } = analyzeCurrentDocument();
+        const form = analysis.results[0];
+        const button = form.submitterResults[0];
+
+        check(form.relationship === "same-site", "Wrong default destination");
+        check(button.relationship === "cross-site", "Override was missed");
+        check(button.method === "post", "POST should be inherited");
+
+        check(
+          button.findings.some(item => item.id === "FORM-CROSS-SITE"),
+          "Missing cross-site finding"
+        );
+      }
+    );
+
+    run(
+      "Dialog button does not produce submission findings",
+      `
+        <form action="/session" method="post">
+          <input type="password">
+          <button
+            type="submit"
+            formmethod="dialog"
+            formaction="https://identity.example.org/session"
+          >
+            Close
+          </button>
+        </form>
+      `,
+      () => {
+        const { analysis } = analyzeCurrentDocument();
+        const button = analysis.results[0].submitterResults[0];
+
+        check(
+          button.relationship === "not-submitted",
+          "Dialog should not submit data"
+        );
+        check(
+          button.findings.length === 0,
+          "Unexpected dialog destination findings"
+        );
+      }
+    );
+
+    run(
+      "Disabled override is excluded from button analysis",
+      `
+        <form action="/session">
+          <input type="password">
+          <fieldset disabled>
+            <button
+              type="submit"
+              formaction="https://identity.example.org/session"
+            >
+              Continue
+            </button>
+          </fieldset>
+        </form>
+      `,
+      () => {
+        const { analysis } = analyzeCurrentDocument();
+        const form = analysis.results[0];
+
+        check(
+          form.skippedDisabledSubmitters === 1,
+          "Disabled override was not counted"
+        );
+        check(
+          form.submitterResults.length === 0,
+          "Disabled override should be skipped"
+        );
+      }
+    );
+
+    run(
+      "External controls retain their form association",
+      `
+        <form id="account" action="/session"></form>
+
+        <input type="password" form="account">
+
+        <button
+          type="submit"
+          form="account"
+          formaction="https://identity.example.org/session"
+          formmethod="post"
+        >
+          Continue
+        </button>
+      `,
+      () => {
+        const { analysis } = analyzeCurrentDocument();
+
+        check(
+          analysis.passwordForms === 1,
+          "External password field was missed"
+        );
+        check(
+          analysis.results[0].submitterResults[0].relationship ===
+            "cross-site",
+          "External button override was missed"
+        );
+      }
+    );
+
+    run(
+      "Complete flow does not read field values",
+      `
+        <form action="/session" method="post">
+          <input type="text">
+          <input type="password">
+        </form>
+      `,
+      () => {
+        for (const input of fixture.querySelectorAll("input")) {
+          Object.defineProperty(input, "value", {
+            configurable: true,
+            get() {
+              throw new Error("A field value was accessed");
+            }
+          });
+        }
+
+        const { analysis } = analyzeCurrentDocument();
+
+        check(
+          analysis.passwordForms === 1,
+          "Analysis did not complete"
+        );
+      }
+    );
+
+    run(
+      "Document base URL reaches the analyzer correctly",
+      `
+        <form action="session" method="post">
+          <input type="password">
+        </form>
+      `,
+      () => {
+        const base = document.createElement("base");
+        base.href = "https://identity.example.org/forms/";
+        document.head.prepend(base);
+
+        try {
+          const { analysis } = analyzeCurrentDocument();
+          const form = analysis.results[0];
+
+          check(
+            form.relationship === "cross-site",
+            "Relative action ignored the document base URL"
+          );
+          check(
+            form.destinationOrigin === "https://identity.example.org",
+            "Wrong resolved destination"
+          );
+        } finally {
+          base.remove();
+        }
+      }
+    );
+
+    lines.push("");
+    lines.push(`${passed}/${passed + failed} integration checks passed.`);
+
+    output.textContent = lines.join("\n");
+
+    document.title = failed
+      ? "FAIL — Diver Integration Tests"
+      : "PASS — Diver Integration Tests";
+  </script>
+</body>
+</html>

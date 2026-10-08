@@ -75,8 +75,17 @@
     </section>
 
     <section class="findings-card" aria-labelledby="findings-label">
-      <h2 class="label" id="findings-label">Findings</h2>
+      <h2 class="label" id="findings-label">URL findings</h2>
       <ul id="findings"></ul>
+      <div class="form-check" aria-labelledby="form-label">
+        <h3 class="label" id="form-label">Password form check</h3>
+        <p id="form-status" role="status">Not inspected yet.</p>
+        <ul id="form-findings"></ul>
+        <p class="domain-note" id="form-coverage" hidden>
+          Current document only. Frames, shadow DOM and JavaScript submissions
+          are not inspected. Form findings do not affect the URL score.
+        </p>
+      </div>
     </section>
 
     <footer class="popup-footer">
