@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "npm run test:engine && npm run test:metrics && npm run test:labeled && npm run test:importer && npm run test:split && npm run test:development && npm run test:thresholds && npm run test:benign-pilot && npm run test:candidate-path && npm run test:candidate-domain",
+    "test": "npm run test:engine && npm run test:metrics && npm run test:labeled && npm run test:importer && npm run test:split && npm run test:development && npm run test:thresholds && npm run test:benign-pilot && npm run test:candidate-path && npm run test:candidate-domain && npm run test:site-identity",
     "evaluate": "node evaluation/node/evaluate.js",
     "test:engine": "node evaluation/node/test-engine.js",
     "test:metrics": "node --test evaluation/node/test-metrics.js",
@@ -26,7 +26,8 @@
     "test:candidate-path": "node --test evaluation/node/test-candidate-path.js",
     "experiment:path-signal": "node evaluation/node/experiment-path-signal.js",
     "test:candidate-domain": "node --test evaluation/node/test-candidate-domain.js",
-    "experiment:domain-signal": "node evaluation/node/experiment-domain-signal.js"
+    "experiment:domain-signal": "node evaluation/node/experiment-domain-signal.js",
+    "test:site-identity": "node --test evaluation/node/test-site-identity.js"
   },
   "dependencies": {
     "csv-parse": "7.0.3",
