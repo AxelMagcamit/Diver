@@ -127,8 +127,8 @@ body {
 .bubbles i:nth-child(31) { left: 4%; --size: 8px; --duration: 11s; --delay: -7.6s; --drift: 6px; --turn: 8deg; }
 .bubbles i:nth-child(32) { left: 93%; --size: 7px; --duration: 18s; --delay: -5.56s; --drift: -5px; --turn: -9deg; }
 
-.container { position: relative; padding: 22px; }
-.brand-header { display: flex; align-items: center; justify-content: flex-start; gap: 13px; margin: 2px 0 22px; }
+.container { position: relative; padding: 16px; }
+.brand-header { display: flex; align-items: center; justify-content: flex-start; gap: 13px; margin: 0 0 10px; }
 .brand-logo { width: 52px; height: 52px; flex: 0 0 52px; display: block; border-radius: 14px; background: #000; box-shadow: 0 0 0 1px #527dbb50, 0 6px 18px #0005; }
 .brand-copy { flex: 0 0 auto; text-align: left; }
 h1 { font-family: "Segoe UI", Arial, sans-serif; font-size: 29px; letter-spacing: 3px; font-weight: 700; line-height: 1; margin: 0; }
@@ -138,17 +138,17 @@ h1 { font-family: "Segoe UI", Arial, sans-serif; font-size: 29px; letter-spacing
   border: 1px solid #9bb9d21c;
   border-radius: 16px;
   box-shadow: 0 8px 24px #0003, inset 0 1px 0 #ffffff03;
-  padding: 17px;
+  padding: 14px;
 }
 .label { margin: 0; font-size: 10px; letter-spacing: 1.4px; line-height: 1.5; font-weight: 600; text-transform: uppercase; color: var(--muted); }
 #current-url { font-size: 12px; line-height: 1.6; margin: 8px 0 0; overflow-wrap: anywhere; max-height: 76px; overflow-y: auto; scrollbar-width: thin; }
 
 .score-card { margin-top: 12px; border-color: #527dbb55; background: linear-gradient(125deg, #142a48f5, #0b1828f5 80%); }
-.site-identity { margin-top: 12px; padding-top: 12px; border-top: 1px solid #9bb9d226; }
+.site-identity { margin-top: 9px; padding-top: 9px; border-top: 1px solid #9bb9d226; }
 #site-domain { margin: 5px 0; font-size: 17px; font-weight: 650; line-height: 1.4; color: #d6e7ff; overflow-wrap: anywhere; unicode-bidi: isolate; }
 .domain-note { margin: 0; color: #aab9c9; font-size: 10px; line-height: 1.5; }
 .score-heading { display: flex; align-items: center; justify-content: space-between; }
-#risk-score { font-size: 38px; font-weight: 650; letter-spacing: -1.5px; line-height: 1.2; margin: 12px 0 15px; font-variant-numeric: tabular-nums; }
+#risk-score { font-size: 34px; font-weight: 650; letter-spacing: -1.5px; line-height: 1.2; margin: 8px 0 10px; font-variant-numeric: tabular-nums; }
 .status-row { border-top: 1px solid #ffffff12; padding-top: 12px; }
 .status-row .label { font-size: 9px; }
 #status { font-size: 13px; font-weight: 500; line-height: 1.5; margin: 5px 0 0; overflow-wrap: anywhere; }
@@ -162,7 +162,7 @@ h1 { font-family: "Segoe UI", Arial, sans-serif; font-size: 29px; letter-spacing
 #findings strong { font-size: 12px; font-weight: 600; color: #f5f6f8; }
 #findings p { color: #b4bfc8; font-size: 12px; margin: 5px 0 0; }
 
-.popup-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 15px; padding-top: 5px; border-top: 1px solid #9bb9d218; }
+.popup-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding-top: 5px; border-top: 1px solid #9bb9d218; }
 .footer-caption { font-size: 8px; letter-spacing: 1.8px; color: #a2afb8; }
 .motion-control { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #c0cad1; cursor: pointer; padding: 5px 0; }
 .motion-indicator { width: 11px; height: 11px; border: 1px solid #728491; border-radius: 3px; }
@@ -193,7 +193,8 @@ h1 { font-family: "Segoe UI", Arial, sans-serif; font-size: 29px; letter-spacing
 }
 
 #score-explanation {
-  margin: 0 0 14px;
+  margin: 0 0 10px;
   max-width: 100%;
   line-height: 1.6;
 }
+
