@@ -53,6 +53,8 @@
     <option value="no-forms">1. No password forms</option>
     <option value="same-site">2. Same-site HTTPS destination</option>
     <option value="cross-site">3. External HTTPS destination</option>
+    <option value="unsupported">4. Unsupported destination</option>
+    <option value="unassociated">5. Password field without a form</option>
   </select>
 
   <p id="expected" role="status"></p>
@@ -63,16 +65,11 @@
     const fixture = document.getElementById("fixture");
     const expected = document.getElementById("expected");
 
-    // Prevent normal submissions for every dynamically created form.
     document.addEventListener("submit", event => {
       event.preventDefault();
     }, true);
 
-    function createPasswordForm(action) {
-      const form = document.createElement("form");
-      form.method = "post";
-      form.action = action;
-
+    function addPasswordField(container) {
       const label = document.createElement("label");
       label.htmlFor = "demo-password";
       label.textContent = "Demo password field — leave empty";
@@ -82,50 +79,84 @@
       input.type = "password";
       input.autocomplete = "off";
 
+      container.append(label, input);
+    }
+
+    function createPasswordForm(action) {
+      const form = document.createElement("form");
+      form.method = "post";
+      form.action = action;
+
+      addPasswordField(form);
+
       const button = document.createElement("button");
       button.type = "submit";
       button.textContent = "Demo submit — submission prevented";
 
-      form.append(label, input, button);
+      form.append(button);
       fixture.append(form);
     }
 
     function renderCase() {
       fixture.replaceChildren();
 
-      if (selector.value === "no-forms") {
-        const message = document.createElement("p");
-        message.textContent = "This case contains no forms or password fields.";
-        fixture.append(message);
+      switch (selector.value) {
+        case "no-forms": {
+          const message = document.createElement("p");
+          message.textContent =
+            "This case contains no forms or password fields.";
+          fixture.append(message);
 
-        expected.textContent =
-          "Expected: No password forms found in this document.";
-        return;
+          expected.textContent =
+            "Expected: No password forms found in this document.";
+          break;
+        }
+
+        case "same-site": {
+          const destination = new URL(location.href);
+          destination.protocol = "https:";
+          destination.port = "";
+          destination.pathname = "/session";
+          destination.search = "";
+          destination.hash = "";
+
+          createPasswordForm(destination.href);
+
+          expected.textContent =
+            "Expected: 1 password form inspected. " +
+            "No destination findings in the declared form actions.";
+          break;
+        }
+
+        case "cross-site": {
+          createPasswordForm("https://identity.example.org/session");
+
+          expected.textContent =
+            "Expected: 1 password form inspected. " +
+            "FORM-CROSS-SITE only.";
+          break;
+        }
+
+        case "unsupported": {
+          createPasswordForm("mailto:demo@example.org");
+
+          expected.textContent =
+            "Expected: 1 password form inspected. " +
+            "FORM-UNSUPPORTED-ACTION: Non-web form destination.";
+          break;
+        }
+
+        case "unassociated": {
+          // This field is deliberately outside every form.
+          addPasswordField(fixture);
+
+          expected.textContent =
+            "Expected: No password forms found, plus a message " +
+            "that 1 password field has no associated form and " +
+            "its submission destination could not be determined.";
+          break;
+        }
       }
-
-      if (selector.value === "same-site") {
-        // Declare HTTPS on the same hostname.
-        // No HTTPS server is required because nothing is submitted.
-        const destination = new URL(location.href);
-        destination.protocol = "https:";
-        destination.port = "";
-        destination.pathname = "/session";
-        destination.search = "";
-        destination.hash = "";
-
-        createPasswordForm(destination.href);
-
-        expected.textContent =
-          "Expected: 1 password form inspected. " +
-          "No destination findings in the declared form actions.";
-        return;
-      }
-
-      createPasswordForm("https://identity.example.org/session");
-
-      expected.textContent =
-        "Expected: 1 password form inspected. " +
-        "FORM-CROSS-SITE only; no FORM-HTTP.";
     }
 
     selector.addEventListener("change", renderCase);
