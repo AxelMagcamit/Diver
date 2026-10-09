@@ -1,10 +1,10 @@
 # Diver privacy policy
 
-Effective date: 9 October 2026. Applies to the version 0.5.0 release candidate.
+Effective date: 9 October 2026. Applies to the version 0.6.0 release candidate.
 
 ## Purpose
 
-Diver checks local page information for phishing-risk and unsafe password-handling signals, and compares the top page's hostname with two downloaded third-party reputation lists.
+Diver checks local page information for phishing-risk and unsafe password-handling signals, and compares the top page's hostname and supported page URL patterns with downloaded third-party reputation lists from two publishers.
 
 ## Information processed on your device
 
@@ -16,7 +16,7 @@ Page information is used for analysis and popup display. It is not uploaded by D
 
 ## External downloads
 
-Diver downloads the public MetaMask `eth-phishing-detect` configuration from `raw.githubusercontent.com` and the general Phishing Hosts Blocklist from `malware-filter.gitlab.io`. Matching occurs on your device. The provider is not sent the page URL, hostname being checked, form structure, or entered field values in these download requests.
+Diver downloads the public MetaMask `eth-phishing-detect` configuration from `raw.githubusercontent.com` and the general Phishing Hosts Blocklist and its Vivaldi page-pattern feed from `malware-filter.gitlab.io`. Matching occurs on your device. The provider is not sent the page URL, hostname being checked, form structure, or entered field values in these download requests.
 
 The hosting services can receive normal download metadata such as your IP address, browser user-agent, and request time. Requests omit cookies/credentials and referrer information. GitHub handles its own service data under its [privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement). GitLab operates the other download host; see its [privacy statement](https://about.gitlab.com/privacy/).
 
@@ -24,7 +24,7 @@ Diver's developer does not receive these download requests. This version has no 
 
 ## Local storage and retention
 
-Diver stores normalized provider blocklist/allowlist entries and snapshot download timestamps in extension storage. The general source also stores its publisher-reported update timestamp. It requests refresh after 12 hours when a supported check runs and stops using a snapshot once its download age reaches 24 hours if an update fails. A general snapshot is also rejected once its publisher update timestamp is at least 24 hours old, even if downloaded recently. Each source is cached independently.
+Diver stores normalized provider blocklist/allowlist entries and snapshot download timestamps in extension storage. The general host and page sources also store their publisher-reported update timestamps. Public provider page patterns can include paths or query parameters; these cached entries come from the feed and are not a log of visited pages. Visited page URLs are matched in memory and are not added to the cache. It requests refresh after 12 hours when a supported check runs and stops using a snapshot once its download age reaches 24 hours if an update fails. A general snapshot is also rejected once its publisher update timestamp is at least 24 hours old, even if downloaded recently. Each source is cached independently.
 
 An expired snapshot may remain stored until replaced or the extension's data is removed; it is not used to return a current match.
 

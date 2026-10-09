@@ -1,8 +1,8 @@
 # Diver public MVP release checkpoint
 
-## Current scope: version 0.5.0
+## Current scope: version 0.6.0
 
-URL structure checks, declared password-form handling, accessible frames/open shadow DOM, two-source exact top-hostname reputation checks, and selective automatic warning popups. This is an explainable risk-warning tool. It does not block navigation or guarantee protection.
+URL structure checks, declared password-form handling, accessible frames/open shadow DOM, exact top-hostname and supported page-pattern reputation checks from two publishers, and selective automatic warning popups. This is an explainable risk-warning tool. It does not block navigation or guarantee protection.
 
 ## Completed behavior checks
 
@@ -28,11 +28,11 @@ Synthetic domains were served as local test responses. No live malicious website
 
 **Name:** Diver — Explainable phishing-risk warnings
 
-**Summary:** Inspect URL and password-form risks, with local domain reputation checks and clear, source-attributed warnings.
+**Summary:** Inspect URL and password-form risks, with local domain and page reputation checks and clear, source-attributed warnings.
 
-**Description:** Diver helps you review suspicious URL signals and declared password-form handling. It checks GET credential exposure, HTTP password pages/destinations, and cross-site form actions in accessible documents. Locally cached MetaMask and malware-filter lists add exact hostname matching for Web3 and general phishing reports. Selected risks open an explanatory popup in the visible tab.
+**Description:** Diver helps you review suspicious URL signals and declared password-form handling. It checks GET credential exposure, HTTP password pages/destinations, and cross-site form actions in accessible documents. Locally cached MetaMask and malware-filter lists add exact hostname matching for Web3 and general phishing reports, plus supported page patterns from malware-filter. Selected risks open an explanatory popup in the visible tab.
 
-Checks run locally. Browsing URLs and password values are not uploaded. The extension downloads provider list data from GitHub and stores those snapshots locally. It does not read entered field values or store browsing-history logs.
+Checks run locally. Browsing URLs and password values are not uploaded. The extension downloads provider list data from GitHub and GitLab Pages and stores those snapshots locally. It does not read entered field values or store browsing-history logs.
 
 Diver does not prevent navigation, verify that a website is safe, or inspect actual JavaScript credential transmissions. Restricted documents, closed shadow DOM, non-HTTP/HTTPS documents, and unlisted threats can be missed. Source reports and structural signals can be mistaken. The URL score is a provisional rule total, not a probability.
 
@@ -43,4 +43,4 @@ Diver does not prevent navigation, verify that a website is safe, or inspect act
 - https://developer.chrome.com/docs/webstore/publish
 - https://developer.chrome.com/docs/webstore/program-policies/privacy
 
-The latest source integration and limited historical coverage are documented in [two-source-checkpoint.md](two-source-checkpoint.md). The previous 0.4.0 review is retained as historical evidence, not a current-version certification.
+The latest page integration and limited historical coverage are documented in [page-reputation-checkpoint.md](page-reputation-checkpoint.md). The earlier two-source evidence is retained in [two-source-checkpoint.md](two-source-checkpoint.md). The previous 0.4.0 review is retained as historical evidence, not a current-version certification.

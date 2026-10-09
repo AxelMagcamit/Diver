@@ -12,3 +12,5 @@ entries and a limited set of shared-service hostnames, deduplicates entries, and
 performs exact hostname matching. Adapted dataset entries retain CC BY-SA 4.0.
 This dataset license applies to the dataset, separately from Diver's own code.
 Diver is not endorsed by the publisher or its upstream sources.
+
+Version 0.6.0 additionally adapts the publisher Vivaldi document-rule feed into exact-host literal page patterns, omitting unsupported rules and host-only rules. The adapted cached data remains CC BY-SA 4.0.

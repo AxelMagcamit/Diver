@@ -11,17 +11,18 @@ function renderReputation(reputation) {
   for (const check of checks) {
     let explanation;
     if (check.status === "listed") {
-      explanation = `Exact hostname match: ${check.hostname}. A source report is not an independently confirmed phishing verdict.`;
+      explanation = check.matchType === "page" ? "This page matches a reported URL pattern. Other pages on this hostname are not covered by this page report. A report can be mistaken or later removed." : `Exact hostname match: ${check.hostname}. A source report is not an independently confirmed phishing verdict.`;
     } else if (check.status === "not-listed") {
-      explanation = "No exact hostname match in this source. An unlisted site can still be malicious. Parent domains and path-specific reports are not matched.";
+      explanation = check.matchType === "page" ? "No supported page pattern matched. Matching uses exact hosts and literal, case-sensitive paths; wildcard, subdomain expansion and nonstandard ports are not covered. An unlisted page can still be malicious." : "No exact hostname match in this source. An unlisted site can still be malicious. Parent domains and path-specific reports are not matched.";
     } else {
       explanation = "This reputation source is unavailable. It cannot establish whether this site is listed. Other source and local rule findings remain available.";
     }
     if (check.source?.includes("MetaMask")) explanation += " This source focuses on Web3 threats.";
+    if (check.skippedRules) explanation += ` Unsupported page patterns omitted: ${check.skippedRules}.`;
     if (check.sourceUpdatedAt) explanation += ` Source updated: ${new Date(check.sourceUpdatedAt).toLocaleString()}.`;
     if (check.fetchedAt) explanation += ` Downloaded: ${new Date(check.fetchedAt).toLocaleString()}.`;
     if (check.refreshDelayed) explanation += " Refresh is delayed; cached data is still within its use limit.";
-    appendFinding(container, "Domain reputation: " + (check.source ?? "Unavailable"), explanation);
+    appendFinding(container, (check.matchType === "page" ? "Page reputation: " : "Domain reputation: ") + (check.source ?? "Unavailable"), explanation);
     if (check.source?.includes("malware-filter")) {
       const link = document.createElement("a");
       link.href = "https://gitlab.com/malware-filter/phishing-filter";

@@ -5,9 +5,9 @@ export function getAutomaticWarning(urlResult, formAnalysis, reputation = null) 
     if (check.status !== "listed") continue;
     const scope = check.source?.includes("MetaMask")
       ? "This source focuses on Web3 phishing and scams. "
-      : "This source reports general phishing domains. ";
+      : check.matchType === "page" ? "This source reports phishing URL patterns. " : "This source reports general phishing domains. ";
     reasons.add(
-      "This exact hostname is listed by " + (check.source ?? "a reputation source") + ". " +
+      (check.matchType === "page" ? "This page matches a reported URL pattern from " : "This exact hostname is listed by ") + (check.source ?? "a reputation source") + ". " +
       scope + "A report can be mistaken or later removed."
     );
   }
