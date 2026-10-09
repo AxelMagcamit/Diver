@@ -42,4 +42,4 @@ Run `npm run test:navigation-browser` after installing the testing runtime. `DIV
 
 The fix does not classify an entire redirect chain or stop a page before loading. Warnings still depend on what Diver can inspect and what its rules or lists recognize. Restricted pages, withheld site access, and browser popup restrictions can prevent warnings.
 
-Historical detection coverage remains about 2.40% on the measured phishing labels. Live testing in the VM is still pending. See the [interview guide](interview-guide.md) for a short explanation of this bug and fix.
+Historical detection coverage remains about 2.40% on the measured phishing labels. Live testing in the VM is still pending.

@@ -103,11 +103,11 @@ The earlier address-only experiment caught 524 of 78,827 phishing labels at a sc
 
 Code tests and harmless Chrome fixtures passed, including redirects, changing addresses without reloading, and repeat-warning prevention. No live malicious page was opened in these checks. Live testing in a separate VM is still pending. Diver cannot yet be described as dependable protection against phishing in general.
 
-## What I can explain in an interview
+## Project decisions
 
-The main parts are the address rules, form collector, form analyzer, list matching, and automatic warning flow. I can explain why checks stay local, why a page report should not flag a whole hosting service, and why a dismissed warning must not silence a different destination.
+The main parts are the address rules, form collector, form analyzer, list matching, and automatic warning flow. Checks stay local to avoid uploading browsing addresses. Page reports are kept separate from whole-host reports, and closing a warning does not silence a different reported destination.
 
-The [interview guide](docs/interview-guide.md) gives short explanations, example answers, and a map of the code. Detailed evidence is in the [list checkpoint](docs/two-source-checkpoint.md), [page checkpoint](docs/page-reputation-checkpoint.md), and [navigation checkpoint](docs/navigation-warning-checkpoint.md).
+Detailed evidence is in the [list checkpoint](docs/two-source-checkpoint.md), [page checkpoint](docs/page-reputation-checkpoint.md), and [navigation checkpoint](docs/navigation-warning-checkpoint.md).
 
 ## Release and support
 

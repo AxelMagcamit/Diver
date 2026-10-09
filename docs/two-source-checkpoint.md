@@ -61,4 +61,4 @@ Hashes identify the exact files used:
 | Development input | `93243918ce1c21aab337b14bc9322471a679abdc2c6f0935f99fb8ea649a4228` |
 | Legitimate pilot | `abdcd5fed213b194be0d7ad72eaa49bc0a55cc754b44906b4292d3801739690d` |
 
-For the interview: explain the difference between your rules and outside reports, why matching happens locally, and why an unavailable list cannot establish safety. See the [interview guide](interview-guide.md).
+Diver keeps its own rules separate from outside reports. Matching happens locally, and an unavailable list cannot establish that a site is safe.

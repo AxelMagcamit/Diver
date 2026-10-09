@@ -9,3 +9,6 @@ evaluation/results/
 
 # Generated extension upload packages.
 /release/
+
+# Private preparation notes
+/docs/interview-guide.md

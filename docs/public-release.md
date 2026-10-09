@@ -50,6 +50,5 @@ Lists download on first use. A failed source is shown as unavailable. No extensi
 - [Current page-check evidence](page-reputation-checkpoint.md)
 - [Warning delivery fix](navigation-warning-checkpoint.md)
 - [Earlier two-list comparison](two-source-checkpoint.md)
-- [Interview guide](interview-guide.md)
 
 The earlier 0.4.0 review is kept as historical evidence. It is not a certification of the current version.

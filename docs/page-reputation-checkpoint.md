@@ -53,5 +53,3 @@ That is 169 extra phishing-labeled warnings. The detected share is still only ab
 Run `npm run evaluate:pages -- <metamask.json> <general-hosts.txt> <pages.txt> --at 2026-10-09T13:03:11Z` with the recorded source files and checksum-verified development inputs. The report records file and code hashes, counts, and requested feed addresses without raw browsing URLs. No holdout was read or threshold adjusted.
 
 The page feed's SHA-256 is `cb313fba0f8e9cfdf0095d648f2c37cf5cd18d3789db40707d61dbd867926c46`. A hash identifies the exact file used, so another run can check whether its input changed. The evaluator can freeze its clock to repeat an older result; the running extension always uses the real time.
-
-See the [interview guide](interview-guide.md) for a short explanation of the design choice.
