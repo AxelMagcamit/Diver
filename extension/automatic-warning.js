@@ -1,11 +1,10 @@
 import { analyzeUrl } from "./engine/analyzer.js";
-import { collectPasswordForms } from "./engine/form-collector.js";
-import { analyzePasswordForms } from "./engine/form-analyzer.js";
+import { inspectTabFrames } from "./engine/frame-inspection.js";
 import { getAutomaticWarning } from "./engine/warning-policy.js";
 
 const generations = new Map();
 
-async function scan(tabId, expectedDocumentId) {
+async function scan(tabId) {
   const generation = (generations.get(tabId) ?? 0) + 1;
   generations.set(tabId, generation);
 
@@ -27,41 +26,10 @@ async function scan(tabId, expectedDocumentId) {
       return;
     }
 
-    const target = expectedDocumentId
-      ? {
-          tabId,
-          documentIds: [expectedDocumentId]
-        }
-      : {
-          tabId,
-          frameIds: [0]
-        };
-
-    const entries = await chrome.scripting.executeScript({
-      target,
-      world: "ISOLATED",
-      func: collectPasswordForms
-    });
-
-    const entry = entries.find(item => item.frameId === 0);
-    const snapshot = entry?.result;
-
-    if (
-      !entry?.documentId ||
-      snapshot?.pageUrl !== tab.url
-    ) {
-      return;
-    }
-
-    const analysis = analyzePasswordForms(
-      snapshot.pageUrl,
-      snapshot.forms,
-      {
-        baseUrl: snapshot.baseUrl,
-        unassociatedPasswordFields:
-          snapshot.unassociatedPasswordFields
-      }
-    );
+    const {
+      topDocumentId,
+      analysis
+    } = await inspectTabFrames(tab);
 
     const warning = getAutomaticWarning(
       analyzeUrl(tab.url),
@@ -69,14 +37,13 @@ async function scan(tabId, expectedDocumentId) {
     );
 
     if (!warning.warn) return;
-
     if (generations.get(tabId) !== generation) return;
 
     const current = await chrome.tabs.get(tabId);
 
     if (
       !current.active ||
-      current.url !== snapshot.pageUrl
+      current.url !== tab.url
     ) {
       return;
     }
@@ -90,7 +57,7 @@ async function scan(tabId, expectedDocumentId) {
     const claims = await chrome.scripting.executeScript({
       target: {
         tabId,
-        documentIds: [entry.documentId]
+        documentIds: [topDocumentId]
       },
       world: "ISOLATED",
       func: () => {
@@ -107,7 +74,7 @@ async function scan(tabId, expectedDocumentId) {
 
     if (!claims[0]?.result) return;
 
-    claimedDocumentId = entry.documentId;
+    claimedDocumentId = topDocumentId;
 
     if (generations.get(tabId) !== generation) {
       throw new Error("Inspection was superseded.");
@@ -117,7 +84,7 @@ async function scan(tabId, expectedDocumentId) {
 
     if (
       !latest.active ||
-      latest.url !== snapshot.pageUrl ||
+      latest.url !== tab.url ||
       !(await chrome.windows.get(latest.windowId)).focused
     ) {
       throw new Error("The visible page changed.");
@@ -153,14 +120,15 @@ chrome.runtime.onMessage.addListener(
     if (
       message?.type !== "DIVER_WARNING_RESCAN" ||
       sender.id !== chrome.runtime.id ||
-      sender.frameId !== 0 ||
+      !Number.isInteger(sender.frameId) ||
+      sender.frameId < 0 ||
       !Number.isInteger(sender.tab?.id) ||
       !sender.documentId
     ) {
       return;
     }
 
-    scan(sender.tab.id, sender.documentId).then(() => {
+    scan(sender.tab.id).then(() => {
       respond({ done: true });
     });
 

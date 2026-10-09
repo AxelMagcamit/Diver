@@ -1,7 +1,6 @@
 import { analyzeUrl } from "../engine/analyzer.js";
 import { getSiteIdentity } from "../engine/site-identity.js";
-import { collectPasswordForms } from "../engine/form-collector.js";
-import { analyzePasswordForms } from "../engine/form-analyzer.js";
+import { inspectTabFrames } from "../engine/frame-inspection.js";
 import { getAutomaticWarning } from "../engine/warning-policy.js";
 
 const element = id => document.getElementById(id);
@@ -69,8 +68,21 @@ function renderFormFindings(snapshot, analysis) {
   const count = analysis.passwordForms;
 
   element("form-status").textContent = count === 0
-    ? "No password forms found in this document."
+    ? "No password forms found in the inspected documents."
     : `${count} password ${count === 1 ? "form" : "forms"} inspected.`;
+
+  element("form-status").textContent +=
+    ` Across ${analysis.inspectedDocuments} inspected document(s).`;
+
+  if (
+    analysis.partialInspection ||
+    analysis.skippedDocuments > 0
+  ) {
+    addMessage(
+      container,
+      "Some frames could not be inspected. These results are incomplete."
+    );
+  }
 
   let findingCount = 0;
 
@@ -152,39 +164,10 @@ async function inspectPage(tab) {
     "Inspecting password-form structure...";
 
   try {
-    const entries = await chrome.scripting.executeScript({
-      target: {
-        tabId: tab.id,
-        frameIds: [0]
-      },
-      world: "ISOLATED",
-      func: collectPasswordForms
-    });
-
-    const snapshot = entries.find(
-      entry => entry.frameId === 0
-    )?.result;
-
-    if (!snapshot) {
-      throw new Error("No document snapshot.");
-    }
-
-    if (snapshot.pageUrl !== tab.url) {
-      element("form-status").textContent =
-        "The page changed during inspection. Reopen Diver to analyze the current page.";
-
-      return null;
-    }
-
-    const analysis = analyzePasswordForms(
-      snapshot.pageUrl,
-      snapshot.forms,
-      {
-        baseUrl: snapshot.baseUrl,
-        unassociatedPasswordFields:
-          snapshot.unassociatedPasswordFields
-      }
-    );
+    const {
+      snapshot,
+      analysis
+    } = await inspectTabFrames(tab);
 
     renderFormFindings(snapshot, analysis);
 
