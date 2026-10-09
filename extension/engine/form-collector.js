@@ -1,26 +1,43 @@
 export function collectPasswordForms(doc = document) {
-  const forms = Array.from(doc.forms);
+  const roots = [doc];
 
-  const controls = Array.from(
-    doc.querySelectorAll("input, button")
+  // Discover open shadow roots, including nested components.
+  for (let index = 0; index < roots.length; index++) {
+    for (const host of roots[index].querySelectorAll("*")) {
+      if (host.shadowRoot) {
+        roots.push(host.shadowRoot);
+      }
+    }
+  }
+
+  const forms = roots.flatMap(root =>
+    Array.from(root.querySelectorAll("form")).filter(form =>
+      form.namespaceURI === "http://www.w3.org/1999/xhtml"
+    )
   );
 
-  const passwordInputs = controls.filter(
-    control =>
-      control.localName === "input" &&
-      control.type === "password"
+  const controls = roots.flatMap(root =>
+    Array.from(root.querySelectorAll("input, button"))
+  );
+
+  const passwordInputs = controls.filter(control =>
+    control.localName === "input" &&
+    control.type === "password"
   );
 
   const snapshots = forms.map(form => {
-    const hasPasswordField = passwordInputs.some(
-      input => input.form === form
+    const hasPasswordField = passwordInputs.some(input =>
+      input.form === form
     );
-    // Keep a count, never the names or entered values themselves.
-    const namedEnabledPasswordFields = passwordInputs.filter(input =>
-      input.form === form &&
-      !input.matches(":disabled") &&
-      !input.closest("datalist") &&
-      input.hasAttribute("name") && input.getAttribute("name") !== ""
+
+    // Count eligible fields without reading their values.
+    const namedEnabledPasswordFields = passwordInputs.filter(
+      input =>
+        input.form === form &&
+        !input.matches(":disabled") &&
+        !input.closest("datalist") &&
+        input.hasAttribute("name") &&
+        input.getAttribute("name") !== ""
     ).length;
 
     const submitterActions = controls
@@ -45,7 +62,7 @@ export function collectPasswordForms(doc = document) {
         );
       })
       .map(control => ({
-        // null means the button does not override this attribute.
+        // null means this attribute is inherited from the form.
         action: control.getAttribute("formaction"),
         method: control.getAttribute("formmethod"),
         disabled: control.matches(":disabled")
@@ -54,13 +71,8 @@ export function collectPasswordForms(doc = document) {
     return {
       hasPasswordField,
       namedEnabledPasswordFields,
-
-      // Preserve the declared action without adding a scheme.
       action: form.getAttribute("action"),
-
-      // Browser-normalized method: normally "get", "post", or "dialog".
       method: form.method,
-
       submitterActions
     };
   });
@@ -75,9 +87,10 @@ export function collectPasswordForms(doc = document) {
     ).length,
 
     coverage: {
-      scope: "Current document, ordinary DOM",
+      scope: "Current document, ordinary DOM and open shadow DOM",
       includesFrames: false,
-      includesShadowRoots: false,
+      includesShadowRoots: true,
+      includesClosedShadowRoots: false,
       observesJavaScriptRequests: false
     }
   };

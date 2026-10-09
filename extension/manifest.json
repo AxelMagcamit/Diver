@@ -1,11 +1,33 @@
 {
   "manifest_version": 3,
   "name": "Diver",
-  "version": "0.1.0",
+  "version": "0.3.0",
+  "minimum_chrome_version": "127",
   "description": "An explainable phishing detection browser extension and analysis toolkit.",
   "permissions": [
     "activeTab",
     "scripting"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "automatic-warning.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "automatic-watch.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
   ],
   "action": {
     "default_title": "Diver",
