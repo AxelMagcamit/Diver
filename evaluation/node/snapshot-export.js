@@ -50,7 +50,8 @@ function render(id) {
 
 function destinationProperties(snapshot) {
   const analysis = analyzePasswordForms(snapshot.pageUrl, snapshot.forms, {
-    baseUrl: snapshot.baseUrl
+    baseUrl: snapshot.baseUrl,
+    unassociatedPasswordFields: snapshot.unassociatedPasswordFields
   });
   function properties(result) {
     return {
@@ -64,6 +65,7 @@ function destinationProperties(snapshot) {
   return JSON.stringify({
     pageSite: analysis.pageSite,
     passwordForms: analysis.passwordForms,
+    pageFindingIds: analysis.pageFindings.map(finding => finding.id),
     unassociatedPasswordFields: snapshot.unassociatedPasswordFields,
     results: analysis.results.map(form => ({
       ...properties(form),

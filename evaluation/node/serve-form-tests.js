@@ -14,6 +14,7 @@ const htmlType = "text/html; charset=utf-8";
 const jsType = "text/javascript; charset=utf-8";
 
 const routes = new Map([
+  ["/credential-demo", resource("evaluation/node/fixtures/credential-demo.html", htmlType)],
   ["/snapshot-export", resource("evaluation/node/fixtures/form-snapshot-export.html", htmlType)],
   ["/snapshot-export.js", resource("evaluation/node/snapshot-export.js", jsType)],
   ["/sanitize-form-snapshot.js", resource("evaluation/node/sanitize-form-snapshot.js", jsType)],
@@ -106,4 +107,5 @@ server.listen(8765, "127.0.0.1", () => {
   console.log("Popup demo:  http://127.0.0.1:8765/popup-demo");
   console.log("Exporter:    http://127.0.0.1:8765/snapshot-export");
   console.log("Press Ctrl+C to stop.");
+  console.log("Credential check: http://127.0.0.1:8765/credential-demo");
 });

@@ -15,6 +15,13 @@ export function collectPasswordForms(doc = document) {
     const hasPasswordField = passwordInputs.some(
       input => input.form === form
     );
+    // Keep a count, never the names or entered values themselves.
+    const namedEnabledPasswordFields = passwordInputs.filter(input =>
+      input.form === form &&
+      !input.matches(":disabled") &&
+      !input.closest("datalist") &&
+      input.hasAttribute("name") && input.getAttribute("name") !== ""
+    ).length;
 
     const submitterActions = controls
       .filter(control => {
@@ -46,6 +53,7 @@ export function collectPasswordForms(doc = document) {
 
     return {
       hasPasswordField,
+      namedEnabledPasswordFields,
 
       // Preserve the declared action without adding a scheme.
       action: form.getAttribute("action"),

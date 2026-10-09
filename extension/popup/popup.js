@@ -48,6 +48,10 @@ function renderFormFindings(snapshot, analysis) {
     ? "No password forms found in this document."
     : `${count} password ${count === 1 ? "form" : "forms"} inspected.`;
   let findingCount = 0;
+  for (const finding of analysis.pageFindings) {
+    appendFinding(container, `${finding.id}: ${finding.title}`, finding.explanation);
+    findingCount++;
+  }
   let skipped = 0;
   for (const form of analysis.results) {
     const contexts = [
@@ -67,7 +71,7 @@ function renderFormFindings(snapshot, analysis) {
     }
   }
   if (count > 0 && findingCount === 0) {
-    showMessage(container, "No destination findings in the declared form actions.");
+    showMessage(container, "No password-handling findings in the inspected structure.");
   }
   if (snapshot.unassociatedPasswordFields > 0) {
     const item = document.createElement("li");
@@ -77,6 +81,11 @@ function renderFormFindings(snapshot, analysis) {
   if (skipped > 0) {
     const item = document.createElement("li");
     item.textContent = `${skipped} disabled submit-button override(s) skipped.`;
+    container.append(item);
+  }
+  if (analysis.results.some(form => form.namedEnabledPasswordFields === null)) {
+    const item = document.createElement("li");
+    item.textContent = "GET exposure could not be checked because password-field submission metadata is unavailable.";
     container.append(item);
   }
 }
@@ -99,7 +108,8 @@ async function inspectPage(tab) {
       return;
     }
     const analysis = analyzePasswordForms(snapshot.pageUrl, snapshot.forms, {
-      baseUrl: snapshot.baseUrl
+      baseUrl: snapshot.baseUrl,
+      unassociatedPasswordFields: snapshot.unassociatedPasswordFields
     });
     renderFormFindings(snapshot, analysis);
     // Keep the snapshot in memory only; do not log or save page actions.

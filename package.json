@@ -28,7 +28,7 @@
     "test:candidate-domain": "node --test evaluation/node/test-candidate-domain.js",
     "experiment:domain-signal": "node evaluation/node/experiment-domain-signal.js",
     "test:site-identity": "node --test evaluation/node/test-site-identity.js",
-    "test:forms": "node --test evaluation/node/test-form-analyzer.js evaluation/node/test-form-overrides.js",
+    "test:forms": "node --test evaluation/node/test-form-analyzer.js evaluation/node/test-form-overrides.js evaluation/node/test-credential-handling.js",
     "test:page-structures": "node --test evaluation/node/test-page-structures.js",
     "evaluate:page-structures": "node evaluation/node/evaluate-page-structures.js"
   },

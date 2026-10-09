@@ -20,6 +20,9 @@ export function sanitizeFormSnapshot(raw) {
     baseUrl: `${new URL(raw.baseUrl).origin}/`,
     forms: raw.forms.map(form => ({
       hasPasswordField: form.hasPasswordField,
+      ...(form.namedEnabledPasswordFields == null ? {} : {
+        namedEnabledPasswordFields: form.namedEnabledPasswordFields
+      }),
       action: safeAction(form.action),
       method: form.method,
       submitterActions: form.submitterActions.map(button => ({

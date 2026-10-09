@@ -53,12 +53,13 @@ function evaluateDataset(dataset) {
       `${prefix}: unassociatedPasswordFields must be a non-negative integer.`);
 
     const analysis = analyzePasswordForms(snapshot.pageUrl, snapshot.forms, {
-      baseUrl: snapshot.baseUrl
+      baseUrl: snapshot.baseUrl,
+      unassociatedPasswordFields: snapshot.unassociatedPasswordFields
     });
-    const findings = analysis.results.flatMap(form => [
+    const findings = [...analysis.pageFindings, ...analysis.results.flatMap(form => [
       ...form.findings,
       ...form.submitterResults.flatMap(button => button.findings)
-    ]);
+    ])];
 
     return {
       id: record.id, status: "inspected", reason: null,
@@ -83,6 +84,7 @@ try {
     limitations: [
       "Synthetic examples do not measure phishing detection accuracy.",
       "No findings does not establish safety.",
+      "GET exposure requires named-enabled password-field counts; older snapshots may omit them.",
       "Frames, shadow roots and JavaScript submissions are not represented.",
       "Unavailable inspection is not counted as an inspected page."
     ],

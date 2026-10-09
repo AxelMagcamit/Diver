@@ -14,7 +14,7 @@ function validateOptionalString(value, name) {
   }
 }
 
-function analyzeDestination(page, pageSite, baseUrl, action, method) {
+function analyzeDestination(page, pageSite, baseUrl, action, method, namedEnabledPasswordFields) {
   const result = {
     method,
     destinationOrigin: null,
@@ -71,6 +71,17 @@ function analyzeDestination(page, pageSite, baseUrl, action, method) {
 
   result.relationship = sameSite ? "same-site" : "cross-site";
 
+  if (method === "get" && namedEnabledPasswordFields > 0) {
+    result.findings.push({
+      id: "FORM-GET",
+      title: "Password form declares GET submission",
+      explanation:
+        "This form has a named, enabled password field and declares GET. " +
+        "Normal HTML submission can put its value in the destination URL. " +
+        "This check does not read the value or observe actual requests."
+    });
+  }
+
   if (!sameSite) {
     result.findings.push({
       id: "FORM-CROSS-SITE",
@@ -98,7 +109,7 @@ function analyzeDestination(page, pageSite, baseUrl, action, method) {
 export function analyzePasswordForms(
   pageUrl,
   forms,
-  { baseUrl = pageUrl } = {}
+  { baseUrl = pageUrl, unassociatedPasswordFields = 0 } = {}
 ) {
   let page;
 
@@ -114,6 +125,9 @@ export function analyzePasswordForms(
 
   if (!Array.isArray(forms)) {
     throw new TypeError("Forms must be an array.");
+  }
+  if (!Number.isInteger(unassociatedPasswordFields) || unassociatedPasswordFields < 0) {
+    throw new TypeError("unassociatedPasswordFields must be a non-negative integer.");
   }
 
   const pageSite = getSiteIdentity(page.href).value;
@@ -136,6 +150,11 @@ export function analyzePasswordForms(
 
     validateOptionalString(form.action, "Form action");
     validateOptionalString(form.method, "Form method");
+    const namedEnabledPasswordFields = form.namedEnabledPasswordFields ?? null;
+    if (namedEnabledPasswordFields !== null &&
+        (!Number.isInteger(namedEnabledPasswordFields) || namedEnabledPasswordFields < 0)) {
+      throw new TypeError("namedEnabledPasswordFields must be a non-negative integer or absent.");
+    }
 
     const overrides = form.submitterActions ?? [];
 
@@ -147,12 +166,14 @@ export function analyzePasswordForms(
 
     const result = {
       formIndex,
+      namedEnabledPasswordFields,
       ...analyzeDestination(
         page,
         pageSite,
         baseUrl,
         form.action,
-        formMethod
+        formMethod,
+        namedEnabledPasswordFields
       ),
       submitterResults: [],
       skippedDisabledSubmitters: 0
@@ -192,7 +213,8 @@ export function analyzePasswordForms(
           pageSite,
           baseUrl,
           action,
-          method
+          method,
+          namedEnabledPasswordFields
         )
       });
     });
@@ -204,6 +226,16 @@ export function analyzePasswordForms(
     pageSite,
     inspectedForms: forms.length,
     passwordForms: results.length,
+    pageFindings: page.protocol === "http:" && (results.length > 0 || unassociatedPasswordFields > 0)
+      ? [{
+          id: "FORM-HTTP-PAGE",
+          title: "Password field appears on an HTTP page",
+          explanation:
+            "The page containing a password field uses HTTP. An HTTPS form " +
+            "destination does not protect the page itself from modification in transit. " +
+            "Local development pages can also trigger this warning."
+        }]
+      : [],
     results
   };
 }
