@@ -1,46 +1,55 @@
-# Diver public MVP release checkpoint
+# Publishing Diver
 
-## Current scope: version 0.6.1
+Version 0.6.1 runs locally, but Chrome Web Store publication is still pending. Diver is a tool that explains possible risks; it does not block navigation or guarantee protection.
 
-URL structure checks, declared password-form handling, accessible frames/open shadow DOM, exact top-hostname and supported page-pattern reputation checks from two publishers, and selective automatic warning popups. This is an explainable risk-warning tool. It does not block navigation or guarantee protection.
+## What is working
 
-## Completed behavior checks
+The extension checks addresses, password-form structure, reported hostnames, and supported reported page patterns. It can inspect accessible embedded frames and open shadow DOM, which are page components Chrome allows the collector to read.
 
-- Existing Node suite passed after the hybrid code was applied.
-- Real Chrome for Testing loaded the actual extension service worker.
-- A synthetic listed `.test` hostname opened the actual action popup and rendered source attribution.
-- Dismissing the popup suppresses repeat warnings for that destination. A different path/query in the same document can warn; fragment changes alone do not reopen it. HTTP/JavaScript redirects and history URL changes passed local Chrome checks.
-- A routed cross-origin iframe triggered the GET warning with its frame context.
-- Reputation checks exercised boundaries, allowlist precedence, malformed updates, retry backoff, expiry, and privacy of download requests.
+The code tests passed. Isolated Chrome checks also passed for real popups, form warnings, redirects, and address changes without reloading. Closing a warning prevents repeat popups for that destination while still allowing a different reported destination to warn.
 
-Synthetic domains were served as local test responses. No live malicious website was visited. Functional checks do not establish phishing detection accuracy. Browser checks used an isolated profile.
+Those browser examples used harmless local pages and test entries. Passing them shows that the feature works as intended; it does not establish real-world phishing accuracy. Live malicious-page testing in the VM is still pending.
 
-## Required before submission
+## What remains before publication
 
-1. Repository/support links are configured: https://github.com/AxelMagcamit/Diver and https://github.com/AxelMagcamit/Diver/issues. Upload the reviewed source and confirm these pages are accessible.
-2. After uploading the code, verify https://github.com/AxelMagcamit/Diver/blob/main/PRIVACY.md is publicly readable. Supply that public policy URL in the Store privacy field.
-3. Register/sign in to the Chrome Web Store developer dashboard. Account registration and any fee require the user's own account action.
-4. Prepare screenshots and listing text that accurately describe the scope and limitations. Do not claim protection against all malware, a measured hybrid accuracy percentage, or a Google/MetaMask endorsement.
-5. Declare the single purpose and actual data handling, including local URL/form inspection and public-list downloads. Explain the requested host and scripting permissions.
-6. Generate the upload package and inspect its manifest/runtime files. Submit for review. Publication depends on Google review and is not complete merely because an upload package exists.
+1. Check that the [repository](https://github.com/AxelMagcamit/Diver), [support page](https://github.com/AxelMagcamit/Diver/issues), and [privacy policy](https://github.com/AxelMagcamit/Diver/blob/main/PRIVACY.md) are publicly readable.
+2. Register or sign in to the Chrome Web Store developer dashboard. The account and any registration payment need the owner's action.
+3. Finish the remaining evaluation and review the known limitations. Do not advertise general protection that the results do not support.
+4. Prepare screenshots and an accurate description of what the extension does.
+5. Explain the permissions and data handling: local address/form inspection, public-list downloads, and local storage. Add the public privacy-policy link.
+6. Run `npm run package:extension`, check the packaged files, and submit the package for review.
 
-## Suggested listing text
+Building a ZIP or pushing to GitHub is not the same as publishing on the Store. Publication depends on Google's review.
 
-**Name:** Diver — Explainable phishing-risk warnings
+## Draft listing text
 
-**Summary:** Inspect URL and password-form risks, with local domain and page reputation checks and clear, source-attributed warnings.
+**Name:** Diver — Phishing-risk warnings
 
-**Description:** Diver helps you review suspicious URL signals and declared password-form handling. It checks GET credential exposure, HTTP password pages/destinations, and cross-site form actions in accessible documents. Locally cached MetaMask and malware-filter lists add exact hostname matching for Web3 and general phishing reports, plus supported page patterns from malware-filter. Selected risks open an explanatory popup in the visible tab.
+**Summary:** Check website addresses and password forms, compare public phishing reports locally, and see why a warning appears.
 
-Checks run locally. Browsing URLs and password values are not uploaded. The extension downloads provider list data from GitHub and GitLab Pages and stores those snapshots locally. It does not read entered field values or store browsing-history logs.
+**Description:** Diver checks website addresses and password-form settings for possible risks. It can warn about password forms using GET, HTTP password pages or destinations, and supported matches in public phishing reports. It also shows findings when a form declares a destination on another site.
 
-Diver does not prevent navigation, verify that a website is safe, or inspect actual JavaScript credential transmissions. Restricted documents, closed shadow DOM, non-HTTP/HTTPS documents, and unlisted threats can be missed. Source reports and structural signals can be mistaken. The URL score is a provisional rule total, not a probability.
+The extension downloads lists from MetaMask and malware-filter, then checks them on your device. It uses exact hostnames and a limited set of page patterns. Selected warning reasons open a popup in the active browser tab.
 
-**Reviewer test instructions:** Load the package and open a normal HTTPS website. Manually open Diver to inspect URL and reputation results. For controlled transport behavior, run the repository's local form-fixture server and open `/credential-demo` with fields empty; no forms need be submitted. The source list is downloaded on first use, and unavailable downloads are shown explicitly. No account/API key is required for the extension.
+Diver does not read entered passwords, upload browsing addresses, or keep browsing-history logs. The public-list downloads come from GitHub and GitLab Pages; their hosts can receive normal download information such as your IP address. The downloaded list data is stored locally.
 
-## Official publication references
+Diver does not stop a page from loading or prove that a site is safe. It can miss unlisted threats, restricted page content, and submissions handled by JavaScript. Closed shadow DOM and non-HTTP/HTTPS documents are not inspected. Reports and rules can also produce mistaken warnings. The score is a total of address-rule points, not a probability.
 
-- https://developer.chrome.com/docs/webstore/publish
-- https://developer.chrome.com/docs/webstore/program-policies/privacy
+Do not claim a measured overall accuracy percentage, zero false alarms, protection against all malware, or endorsement by Google or MetaMask.
 
-The latest page integration and limited historical coverage are documented in [page-reputation-checkpoint.md](page-reputation-checkpoint.md). The earlier two-source evidence is retained in [two-source-checkpoint.md](two-source-checkpoint.md). The previous 0.4.0 review is retained as historical evidence, not a current-version certification.
+## Harmless reviewer checks
+
+Load the package and open a normal HTTPS website. Click Diver's icon to see address and list results. For local form examples, start the repository's form-test server and open `/credential-demo`. Leave fields empty; no submission is needed. The HTTP examples intentionally produce warnings.
+
+Lists download on first use. A failed source is shown as unavailable. No extension account or API key is required.
+
+## Reference pages
+
+- [Chrome's publication guide](https://developer.chrome.com/docs/webstore/publish)
+- [Chrome's privacy policies](https://developer.chrome.com/docs/webstore/program-policies/privacy)
+- [Current page-check evidence](page-reputation-checkpoint.md)
+- [Warning delivery fix](navigation-warning-checkpoint.md)
+- [Earlier two-list comparison](two-source-checkpoint.md)
+- [Interview guide](interview-guide.md)
+
+The earlier 0.4.0 review is kept as historical evidence. It is not a certification of the current version.

@@ -1,26 +1,45 @@
-# Navigation warning checkpoint — version 0.6.1
+# Warning fix: changing addresses without reloading
 
-Previously, dismissing a warning marked the entire top document as warned. A site could then change to another reported path using history.pushState or history.replaceState without getting a new warning. The existing tab URL-change event already initiated inspection, but the document-wide flag suppressed its result.
+This checkpoint explains the fix in version 0.6.1. It improves when warnings appear; it does not make the detection rules more accurate.
 
-## Change
+## The problem
 
-Warning suppression now records the last successfully claimed destination in the isolated document state. It retains path and query constraints but removes fragments. Repeated scans of that warned destination stay suppressed; another path or query can warn within the same document. Full navigation creates new document state. This is one in-memory last-warning claim, not a persisted browsing history or a list of every previously warned route.
+Some websites change their address without loading a new page. For example, they can use JavaScript's `history.pushState` to move from `/first` to `/second` inside the same document.
 
-The injected claim verifies document.URL against the inspected URL. Each scan supplies a unique token. If a popup attempt fails or a scan is superseded, rollback only releases that scan's own claim; an older failure cannot erase a newer destination's warning. Existing document-ID, generation, focused-window and active-tab checks remain in place. No new permissions, remote code, network interception or main-world history overrides were added.
+Previously, closing one Diver warning marked the whole document as already warned. Diver still checked the new address, but the old flag stopped a new popup from opening. This could hide a warning for a different reported destination.
 
-Normal navigation and URL-change notifications use Chrome's tabs events: https://developer.chrome.com/docs/extensions/reference/api/tabs#event-onUpdated. Redirects are checked at their final inspectable destination; this is not redirect-chain classification or prevention before loading.
+## The fix
 
-## Verification
+Diver now remembers the last destination it warned about, instead of marking the whole document. Another path or query can warn again. Repeated checks of the same warned destination stay quiet. Changing only a fragment, such as `#section`, also stays quiet.
 
-- The full npm test suite passed after integration. The packaged 0.6.1 extension passed the same local browser navigation checks.
-- Seven targeted Node regression tests cover repeated scans, path/query changes, fragments, stale URLs, retry after popup failure, rollback ownership and preservation of watcher state.
-- The actual Chrome extension was tested in an isolated profile using a harmless HTTP server bound only to 127.0.0.1. A synthetic .test hostname resolved to that server through the test browser's resolver settings. Provider caches were synthetic and fresh. No real malicious site or personal browser profile was opened.
-- HTTP 302 redirect and JavaScript location.replace reached a reported final path and opened an attributed warning.
-- history.pushState and history.replaceState to another reported destination opened a new warning after dismissal without reloading the document.
-- Fragment changes and repeat mutation scans did not reopen the dismissed warning. A rapid reported-to-clean navigation ended without a stale warning on the clean page.
+This is one temporary value in the page's isolated extension state. It is not saved to disk as a browsing-history list. Loading a new document gives it new state.
 
-The checked browser fixture is evaluation/browser/test-navigation.cjs. It requires Playwright and its Chromium browser (optional development dependencies, not shipped to extension users), plus a free localhost port 80. DIVER_PLAYWRIGHT_PATH and DIVER_CHROME_PATH can select a locally installed testing runtime. Run npm run test:navigation-browser after setting up that runtime. It creates a temporary isolated browser profile and closes the browser/server after checking. The same fixture can take an unpacked release-stage path as its argument.
+Before claiming a warning, Diver checks that the page's current address still matches the address it inspected. Each scan gets a unique token. If a scan fails, it can only remove its own claim. That prevents an older failed scan from clearing a newer warning's state.
 
-## Limits
+The existing checks for the active tab, focused window, document ID, and latest scan are still used. No new permissions were added. Chrome's [tab update events](https://developer.chrome.com/docs/extensions/reference/api/tabs#event-onUpdated) already tell the worker about address changes.
 
-This fixes warning delivery, not phishing classification. The 0.6.0 historical coverage remains about 2.40% on the measured phishing development labels; no new accuracy claim is made. Warnings still occur after inspection and do not block navigation, scripts or credential submission. Restricted pages, inaccessible documents, withheld site access and browser popup restrictions can prevent automatic warnings. Live-site VM evaluation remains outstanding.
+## What passed
+
+The full Node test suite and the packaged extension checks passed. Seven new tests covered repeats, path/query changes, fragments, stale addresses, retry after failure, older-scan rollback, and keeping the form watcher's state.
+
+In an isolated Chrome profile, harmless local pages showed that:
+
+- An HTTP 302 redirect could reach a reported destination and open a warning.
+- A JavaScript `location.replace` redirect could also open a warning at its destination.
+- `history.pushState` and `history.replaceState` could open a new warning after an earlier one was closed.
+- Fragment changes and repeated form-change scans did not reopen a dismissed warning.
+- Quickly moving from a reported path to a clean path ended without a stale warning over the clean page.
+
+The server only listened on `127.0.0.1`. The browser mapped a test hostname to that server, and the reputation caches used made-up test entries. No real malicious site or personal browser profile was opened.
+
+## Repeat the browser check
+
+The fixture is `evaluation/browser/test-navigation.cjs`. It needs Playwright, its Chromium testing browser, and a free localhost port 80. These are development tools, not requirements for people using the extension.
+
+Run `npm run test:navigation-browser` after installing the testing runtime. `DIVER_PLAYWRIGHT_PATH` and `DIVER_CHROME_PATH` can select an existing runtime. The fixture creates a separate temporary browser profile and closes the browser and server afterward. You can pass an unpacked release folder as an argument to test that package too.
+
+## What this does not prove
+
+The fix does not classify an entire redirect chain or stop a page before loading. Warnings still depend on what Diver can inspect and what its rules or lists recognize. Restricted pages, withheld site access, and browser popup restrictions can prevent warnings.
+
+Historical detection coverage remains about 2.40% on the measured phishing labels. Live testing in the VM is still pending. See the [interview guide](interview-guide.md) for a short explanation of this bug and fix.

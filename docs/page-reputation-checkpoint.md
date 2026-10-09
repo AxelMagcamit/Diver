@@ -1,41 +1,57 @@
-# Page reputation checkpoint — version 0.6.0
+# Adding reports for individual pages
 
-Diver adds supported page-specific reports from the same malware-filter publisher already used for host reports. A reported page on shared hosting can warn without turning that page report into a report against every page on its host. Automatic warnings remain advisory and appear after inspection; they do not block page loading.
+Version 0.6.0 added page checks from the same malware-filter publisher already used for domain reports. The goal was to catch supported reported pages on shared services without turning one page report into a warning about the entire service.
 
-## Matching and limits
+## Why this matters
 
-The feed is https://malware-filter.gitlab.io/malware-filter/phishing-filter-vivaldi.txt, documented by https://github.com/curbengh/phishing-filter. It contains Vivaldi document rules. Diver implements a conservative subset of literal rules shaped like `||host/path^$document`, with exact hostname, case-sensitive serialized pathname/query and separator-or-end matching. It does not claim full Adblock compatibility. A separator excludes letters, digits, underscore, dot, percent and hyphen. A report for /reported does not match /reportedElse, /reported.html or /reported%2Fother; it can match /reported/child or /reported?query, consistent with the declared ending separator. Query constraints in a source pattern are retained. Fragments are excluded from candidate matching.
+A hosting service can contain many unrelated pages. If one page is reported, that does not mean every page on the same hostname is malicious. Diver therefore checks supported page reports separately from whole-host reports.
 
-Wildcard, fragment-bearing, noncanonical, root-only or otherwise unsupported page entries are counted and omitted. No subdomain expansion, fuzzy matching, URL decoding or nonstandard-port matching is added. Host-only feed rules are handled by the separate host source. Exceptions or an unexpected document-rule format reject the refresh rather than silently overriding exceptions. This narrowing favors avoiding overbroad warnings and can miss reported variants.
+The data comes from the publisher's [Vivaldi feed](https://malware-filter.gitlab.io/malware-filter/phishing-filter-vivaldi.txt), documented in its [repository](https://github.com/curbengh/phishing-filter). It is outside threat data, not a list created by Diver.
 
-The source is indexed by exact hostname before checking its page patterns. A page result includes source identity, scope and timestamps; it does not return the matched path or browsing query tokens. Popup findings explain omitted patterns and matching limits. A positive page match still warns if another check is unavailable or MetaMask has an allowlist exception.
+## How matching works
 
-## Freshness, privacy and licensing
+Diver supports a limited form of the publisher's rules: `||host/path^$document`. It requires the exact hostname and a literal, case-sensitive path/query match. The ending `^` means a separator or the end of the address.
 
-Downloads omit credentials and referrers and fetch only the fixed public feed URL. No visited URL is uploaded or added to storage. The cached paths/queries originate in the public provider feed. Refresh at 12 hours, stop using data at 24 hours (both publisher timestamp and download age), 15-minute failure backoff, 15-second download timeout, 8 MiB size limit and 200,000-entry cap. Persistence must succeed before a snapshot becomes active; malformed updates retain a preceding usable cache.
+For example, a rule for `/reported`:
 
-The malware-filter dataset adaptation remains CC BY-SA 4.0 and is attributed in the popup and packaged vendor notice. This is additional coverage from the same publisher, not a third independent threat source.
+- Does not match `/other`, `/reportedElse`, `/reported.html`, or `/reported%2Fother`.
+- Can match `/reported/child` or `/reported?campaign=test` because `/` and `?` are separators.
+- Keeps any query requirement included in the source rule.
 
-## Verification
+Technically, a separator is any character other than a letter, digit, underscore, dot, percent sign, or hyphen. Fragments are left out when checking a visited address.
 
-- Full npm test suite passed, including seven new page-reputation tests for shared-host boundaries, query constraints, privacy, warning scope, unsupported inputs, malformed/exception feeds, expiry, concurrent requests, quota failures and future caches.
-- An isolated Chrome for Testing profile loaded the extension with real-sized provider caches. A harmless locally routed reported page opened the real Chrome action popup; another page on the same synthetic host did not. Closing the warning suppressed repeated warnings. No listed malicious page was visited.
-- Feed snapshot updated 2026-10-09T12:03:11Z: 27,172 supported page entries, 47 omitted page rules. SHA-256 cb313fba0f8e9cfdf0095d648f2c37cf5cd18d3789db40707d61dbd867926c46. Chrome cache usage with the real-sized lists and controlled fixture: 5,209,134 bytes, below the 10 MiB quota.
+Diver does not implement every Adblock-style rule. It skips and counts wildcard, fragment-bearing, root-only, noncanonical, and other unsupported page entries. “Noncanonical” means the entry does not keep the same form when parsed as a URL. It does not expand matches to subdomains, decode paths, use fuzzy matching, or match nonstandard ports. These choices can miss reported variants, but avoid making matches broader than intended.
 
-## Historical comparison
+Whole-host rules are left to the separate host check. An unexpected rule format or an exception rule makes the update fail; Diver does not silently ignore exceptions and apply the blocking rules anyway.
 
-The frozen evaluator uses only checksum-verified development inputs; no holdout or live website is opened. Source snapshot time is frozen for reproducibility only in the evaluator, never in extension runtime. No threshold tuning was performed.
+For efficiency, patterns are grouped by hostname. A lookup only checks patterns for the current hostname. Results show the source and timestamps without returning the matched path or the user's query tokens. A page match can still warn if another source fails or MetaMask has an exception for its own list.
 
-| Historical input | Before page checks | With page checks |
+## Updates and privacy
+
+Only the fixed public feed is downloaded. The address being checked is not uploaded or added to the cache. Cached paths and queries come from the public source file.
+
+Refresh starts after 12 hours when a check runs. Downloads and publisher update times must both be less than 24 hours old. Downloads have a 15-second timeout, an 8 MiB limit, and a 200,000-entry cap. Failed updates wait 15 minutes before retrying. New data is only used after it is successfully saved; a failed update can keep the previous copy while it is still usable.
+
+The adapted malware-filter data remains under CC BY-SA 4.0, with attribution in the popup and vendor notice. This is more data from the same publisher, not a third independent publisher.
+
+## Test results
+
+The full code test suite passed, including seven page-matching tests. An isolated Chrome profile also checked harmless pages: the reported test page opened the real popup, another page on the same host did not, and closing the warning prevented repeats. No live malicious page was opened.
+
+The downloaded feed dated `2026-10-09T12:03:11Z` produced 27,172 supported page entries and 47 skipped page rules. All real-sized provider caches together used 5,209,134 bytes in Chrome, within the 10 MiB limit.
+
+| Historical sample | Before page checks | After page checks |
 | --- | ---: | ---: |
-| PhiUSIIL development: 78,827 phishing-labeled URLs | 1,721 warnings | 1,890 warnings |
-| Same set: 107,859 legitimate-labeled URLs | 0 warnings | 0 warnings |
-| Separate PhreshPhish benign pilot: 4,636 valid URLs | 0 warnings | 0 warnings |
+| 78,827 phishing-labeled URLs | 1,721 warnings | 1,890 warnings |
+| 107,859 legitimate-labeled URLs | 0 warnings | 0 warnings |
+| Separate sample of 4,636 valid legitimate-labeled URLs | 0 warnings | 0 warnings |
 
-The additional 169 phishing-labeled warnings are a measured improvement on this historical input. Coverage is still only about 2.40% of phishing labels. Historical labels are not independently verified current truth; source/dataset overlap is unknown; the form layer has no page data here. Zero observed benign warnings is not a guarantee of zero future false positives. These results do not establish dependable broad real-world protection.
+That is 169 extra phishing-labeled warnings. The detected share is still only about 2.40%. This is a historical development result, not overall real-world accuracy. The labels were not independently rechecked, overlap with the lists is unknown, and there was no page content to measure form checks. Zero warnings on these legitimate samples does not guarantee zero future false alarms.
 
-Reproduce with `npm run evaluate:pages -- <metamask.json> <general-hosts.txt> <pages.txt> --at 2026-10-09T13:03:11Z`. The report records input/source/implementation hashes and source requests, and excludes raw browsing URLs. Original two-source evaluator scope remains reproducible separately.
+## Repeat the comparison
 
-## Interview explanation
+Run `npm run evaluate:pages -- <metamask.json> <general-hosts.txt> <pages.txt> --at 2026-10-09T13:03:11Z` with the recorded source files and checksum-verified development inputs. The report records file and code hashes, counts, and requested feed addresses without raw browsing URLs. No holdout was read or threshold adjusted.
 
-“I built the local collection, warning policy and page matching. Reputation data comes from attributed external publishers. Host-only lists miss malicious pages on shared services, so I added narrow page-pattern matching without flagging unrelated pages. I tested matching boundaries and privacy in an isolated browser, and reported limited historical coverage instead of claiming general accuracy.”
+The page feed's SHA-256 is `cb313fba0f8e9cfdf0095d648f2c37cf5cd18d3789db40707d61dbd867926c46`. A hash identifies the exact file used, so another run can check whether its input changed. The evaluator can freeze its clock to repeat an older result; the running extension always uses the real time.
+
+See the [interview guide](interview-guide.md) for a short explanation of the design choice.

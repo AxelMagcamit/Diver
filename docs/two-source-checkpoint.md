@@ -1,65 +1,64 @@
-# Two-source reputation checkpoint
+# Adding a second reputation source
 
-Version 0.5.0 adds a general phishing-domain source alongside the existing MetaMask Web3 list. The previous version's limited detection evidence is retained in release-review.md. This checkpoint strengthens coverage and failure handling; it does not certify dependable general phishing protection.
+Version 0.5.0 added malware-filter's general phishing-domain list alongside MetaMask's Web3 list. The aim was to cover more reported threats than the Web3 list alone. This checkpoint records that version; later page checks are explained in the [page checkpoint](page-reputation-checkpoint.md).
 
-## Implementation
+## What changed
 
-- MetaMask and malware-filter downloads run concurrently, with independent caches and source results. Either source's exact hostname match can trigger the warning. MetaMask allowlist exceptions apply only to that source.
-- If one source is unavailable and the other has no match, the combined result is unavailable with partial coverage. A successful match still warns when another source is unavailable.
-- Browsing URLs, form snapshots and field values are not uploaded. Only fixed public feed URLs are fetched; credentials and referrers are omitted.
-- Each source has a 15-second download timeout and an 8 MiB response limit. Failed updates back off for 15 minutes and retain a preceding cache only within its use limit.
-- The general feed requires a publisher update timestamp. A source timestamp or download age at least 24 hours old is unusable. Future timestamps and malformed/empty/oversized bodies cannot activate a snapshot. Clock-invalid stored snapshots are replaced on a supported check.
-- Refresh starts when either general-source age or download age reaches 12 hours. The publisher timestamp is not independent verification of every threat.
-- General matching excludes IP/unrecognized-hostname entries and a limited list of shared service roots. It uses exact hostnames with no parent-domain expansion. Known threats on omitted hosts or unlisted subdomains can be missed.
-- Source attribution is shown in the popup. The CC BY-SA 4.0 dataset license and adaptation notice are included separately from Diver's own implementation.
+Diver downloads the two lists at the same time and saves them separately. Either list's exact hostname match can open a warning. MetaMask's exceptions only apply to its own list, so they do not cancel a malware-filter match.
 
-The general source is [Phishing URL Blocklist by malware-filter](https://gitlab.com/malware-filter/phishing-filter), maintained by Ming Di Leom. The publisher identifies OpenPhish, IPThreat and PhishTank as upstream sources and publishes its filters under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Diver consumes the hosts format rather than the publisher's browser filter rules.
+If one list fails and the other has no match, Diver says that the check is unavailable or incomplete. It does not treat missing data as proof that a site is safe. A positive match from the working list still warns.
 
-## Evidence
+Only the fixed public feed addresses are requested. The visited address and form information are not uploaded. Download requests omit cookies and referrers.
 
-The frozen detector and same verified historical development inputs were evaluated offline. Runtime modules were used; the driver supplied local downloaded snapshots instead of network requests. No dataset website was visited, no holdout was read and no rule weights/thresholds were tuned.
+## Keeping the data usable
 
-| Sample | Evaluated | Previous URL/reputation automatic warnings | Version 0.5.0 URL/reputation automatic warnings |
-| --- | ---: | ---: | ---: |
-| PhiUSIIL phishing-labeled URLs | 78,827 | 18 | 1,721 |
-| PhiUSIIL legitimate-labeled URLs | 107,859 | 0 | 0 |
-| Separate PhreshPhish legitimate pilot | 4,636 | 0 | 0 |
+Each download has a 15-second timeout and an 8 MiB limit. Failed updates wait 15 minutes before another attempt. Diver can keep a previous download while it is still within its use limit.
 
-Phishing-sample recall for these URL/reputation layers rose from 0.0228% to **2.1833%**. It remains low. The form layer was not measured because these datasets contain URL records without page DOM. The benign pilot excluded 68 invalid URLs out of 4,704 input records. Samples are reported separately, not pooled into headline accuracy.
+For the general feed, both the download age and the publisher's update age must be less than 24 hours. Refresh starts after either reaches 12 hours when a check runs. Empty, malformed, oversized, stale, or future-dated updates are rejected. Invalid future-dated stored copies request replacement. The publisher's timestamp tells us when the file was updated, not when every report was independently verified.
 
-These are historical development results, not an independent real-world effectiveness estimate. Source labels were not independently verified; provider overlap with dataset sources is unknown; several URLs can share a domain. Zero observed false warnings does not establish a zero future false-positive rate.
+The general host check skips IP addresses, unrecognized hostnames, and a limited set of shared service roots. It checks exact hostnames without expanding to parent domains or subdomains. This can miss threats on skipped hosts or unlisted subdomains.
 
-The general snapshot contained 35,161 eligible hostnames, including 34,739 absent from the earlier MetaMask blocklist snapshot. This is added list coverage, not a count of independently confirmed new threats. The publisher update marker was `2026-10-09T12:03:11Z`.
+The source is [Phishing URL Blocklist by malware-filter](https://gitlab.com/malware-filter/phishing-filter), maintained by Ming Di Leom. Its publisher names OpenPhish, IPThreat, and PhishTank as upstream sources. The filters use [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/); attribution and the adaptation notice are included in Diver. This version used the hosts file, not the publisher's browser-filter rules.
 
-Source hashes for this comparison:
+## What the comparison showed
 
-- MetaMask JSON: `66640950171514caa26cf3d525ac7b28405cc93a00130891307d16bc8745c86d`.
-- General hosts feed: `e80b0ff74ccfe3cbc4c4f37b5c4f13e627646c5476daadc1d4ed340beba66e6c`.
-- Development input: `93243918ce1c21aab337b14bc9322471a679abdc2c6f0935f99fb8ea649a4228`.
-- Benign pilot: `abdcd5fed213b194be0d7ad72eaa49bc0a55cc754b44906b4292d3801739690d`.
+The evaluator used the actual matching code with saved source files and verified historical development inputs. It did not visit the dataset websites, read the final holdout, or adjust thresholds.
 
-## Verification
+| Historical sample | Previous automatic warnings | Version 0.5.0 warnings |
+| --- | ---: | ---: |
+| 78,827 phishing-labeled URLs | 18 | 1,721 |
+| 107,859 legitimate-labeled URLs | 0 | 0 |
+| Separate sample of 4,636 valid legitimate-labeled URLs | 0 | 0 |
 
-The normal Node suite passed after integration, including the existing reputation checks and the new general-source checks. A final focused check also passed for clock-invalid cache replacement.
+The detected share of phishing labels rose from about 0.0228% to 2.1833%. It was still low. These datasets did not contain page content, so the form layer was not measured. The separate legitimate sample had 4,704 input records, with 68 invalid addresses excluded.
 
-Chrome for Testing loaded the actual extension APIs in an isolated profile. Both real-sized snapshots fit Chrome local storage at about 3.51 MB. A synthetic hostname inserted into the general cache opened the actual warning popup, displayed independent source results and publisher time, and did not reopen after dismissal. These are controlled browser checks, not visits to live malicious pages.
+These are historical results, not an independent real-world accuracy estimate. Labels were not independently verified, overlap with the list sources is unknown, and multiple addresses can share a domain. Zero observed wrong warnings does not guarantee zero future wrong warnings.
 
-The upload package contains 28 runtime files with both new modules, source attribution and license text. No datasets or development fixtures are bundled.
+The general download contained 35,161 eligible hostnames; 34,739 were absent from the earlier MetaMask copy. That counts added list entries, not independently confirmed new threats. Its publisher update time was `2026-10-09T12:03:11Z`.
 
-## Reproduction
+## Code and browser checks
 
-Use the previously documented development inputs and manifests. Save both public source files locally, then run:
+The normal Node suite and focused checks passed, including replacement of future-dated cache entries. In an isolated Chrome profile, the real-sized lists used about 3.51 MB. A made-up hostname added to the general list opened the real popup with source details and did not reopen after dismissal. No live malicious page was visited.
+
+The version 0.5.0 package contained 28 runtime files, including the modules, source notices, and licenses. It did not include datasets or test pages. This count describes that version, not the current package.
+
+## Repeat the comparison
+
+Use the documented development inputs and manifests, save the source files locally, then run:
 
 ```powershell
 npm run evaluate:two-source -- <metamask.json> <general-hosts.txt> --at 2026-10-09T16:18:34.196Z
 ```
 
-The evaluator writes a timestamped report under ignored evaluation/results, including input/source/implementation hashes. Reports contain aggregate counts rather than raw browsing URLs. A newly downloaded general snapshot may produce different results; the source content hashes distinguish runs. The optional --at argument freezes the evaluator clock at the original checkpoint time so a retained snapshot can be reproduced later. Omitting it checks source freshness at the current time. This affects only the offline evaluator; the extension always uses the actual clock.
+Reports go under the ignored `evaluation/results` folder and contain counts and file/code hashes instead of raw browsing addresses. The optional `--at` freezes only the evaluator's clock to repeat this older checkpoint. Without it, freshness is checked at the current time. The extension always uses the real time.
 
-## Interview explanation and claims
+Hashes identify the exact files used:
 
-Diver separates three kinds of evidence: provisional URL rules, declared credential-handling risks, and third-party threat reports. It matches downloaded data locally, preserves source attribution, rejects expired general-source data, and treats missing coverage as unknown. It explains risks rather than claiming that a low score proves safety.
+| File | SHA-256 |
+| --- | --- |
+| MetaMask JSON | `66640950171514caa26cf3d525ac7b28405cc93a00130891307d16bc8745c86d` |
+| General hosts feed | `e80b0ff74ccfe3cbc4c4f37b5c4f13e627646c5476daadc1d4ed340beba66e6c` |
+| Development input | `93243918ce1c21aab337b14bc9322471a679abdc2c6f0935f99fb8ea649a4228` |
+| Legitimate pilot | `abdcd5fed213b194be0d7ad72eaa49bc0a55cc754b44906b4292d3801739690d` |
 
-Suitable project description: “Built a Manifest V3 extension combining URL/password-form analysis with two locally cached reputation sources, source-attributed automatic warnings, privacy-conscious downloads and failure-handling tests.”
-
-Do not claim dependable general protection, a 100% accuracy rate, zero false positives or Chrome Web Store deployment. The remaining detection gate is controlled live-page evidence and broader independent coverage evaluation. Store publication remains pending.
+For the interview: explain the difference between your rules and outside reports, why matching happens locally, and why an unavailable list cannot establish safety. See the [interview guide](interview-guide.md).
