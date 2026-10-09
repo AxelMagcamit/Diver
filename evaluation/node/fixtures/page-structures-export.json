@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "source": "synthetic",
+  "collection": {
+    "method": "browser-dom",
+    "environment": "controlled-local-fixtures",
+    "collectedAt": "2026-10-09T12:25:48.799Z",
+    "note": "Lossy export: URL origins retained; paths, queries, fragments and credentials removed."
+  },
+  "records": [
+    {
+      "id": "same-site-http",
+      "inspectionStatus": "available",
+      "snapshot": {
+        "pageUrl": "http://127.0.0.1:8765/",
+        "baseUrl": "http://127.0.0.1:8765/",
+        "forms": [
+          {
+            "hasPasswordField": true,
+            "action": "http://127.0.0.1:8765/",
+            "method": "post",
+            "submitterActions": []
+          }
+        ],
+        "unassociatedPasswordFields": 0,
+        "coverage": {
+          "scope": "Current document, ordinary DOM",
+          "includesFrames": false,
+          "includesShadowRoots": false,
+          "observesJavaScriptRequests": false
+        }
+      }
+    },
+    {
+      "id": "external-https",
+      "inspectionStatus": "available",
+      "snapshot": {
+        "pageUrl": "http://127.0.0.1:8765/",
+        "baseUrl": "http://127.0.0.1:8765/",
+        "forms": [
+          {
+            "hasPasswordField": true,
+            "action": "https://collector.example.net/",
+            "method": "post",
+            "submitterActions": []
+          }
+        ],
+        "unassociatedPasswordFields": 0,
+        "coverage": {
+          "scope": "Current document, ordinary DOM",
+          "includesFrames": false,
+          "includesShadowRoots": false,
+          "observesJavaScriptRequests": false
+        }
+      }
+    },
+    {
+      "id": "button-override",
+      "inspectionStatus": "available",
+      "snapshot": {
+        "pageUrl": "http://127.0.0.1:8765/",
+        "baseUrl": "http://127.0.0.1:8765/",
+        "forms": [
+          {
+            "hasPasswordField": true,
+            "action": "http://127.0.0.1:8765/",
+            "method": "post",
+            "submitterActions": [
+              {
+                "action": "https://identity.example.org/",
+                "method": null,
+                "disabled": false
+              }
+            ]
+          }
+        ],
+        "unassociatedPasswordFields": 0,
+        "coverage": {
+          "scope": "Current document, ordinary DOM",
+          "includesFrames": false,
+          "includesShadowRoots": false,
+          "observesJavaScriptRequests": false
+        }
+      }
+    },
+    {
+      "id": "no-password-forms",
+      "inspectionStatus": "available",
+      "snapshot": {
+        "pageUrl": "http://127.0.0.1:8765/",
+        "baseUrl": "http://127.0.0.1:8765/",
+        "forms": [],
+        "unassociatedPasswordFields": 0,
+        "coverage": {
+          "scope": "Current document, ordinary DOM",
+          "includesFrames": false,
+          "includesShadowRoots": false,
+          "observesJavaScriptRequests": false
+        }
+      }
+    },
+    {
+      "id": "unassociated-field",
+      "inspectionStatus": "available",
+      "snapshot": {
+        "pageUrl": "http://127.0.0.1:8765/",
+        "baseUrl": "http://127.0.0.1:8765/",
+        "forms": [],
+        "unassociatedPasswordFields": 1,
+        "coverage": {
+          "scope": "Current document, ordinary DOM",
+          "includesFrames": false,
+          "includesShadowRoots": false,
+          "observesJavaScriptRequests": false
+        }
+      }
+    },
+    {
+      "id": "unsupported-action",
+      "inspectionStatus": "available",
+      "snapshot": {
+        "pageUrl": "http://127.0.0.1:8765/",
+        "baseUrl": "http://127.0.0.1:8765/",
+        "forms": [
+          {
+            "hasPasswordField": true,
+            "action": "mailto:",
+            "method": "post",
+            "submitterActions": []
+          }
+        ],
+        "unassociatedPasswordFields": 0,
+        "coverage": {
+          "scope": "Current document, ordinary DOM",
+          "includesFrames": false,
+          "includesShadowRoots": false,
+          "observesJavaScriptRequests": false
+        }
+      }
+    }
+  ]
+}

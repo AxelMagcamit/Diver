@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diver — Local Snapshot Export</title>
+  <style>
+    body { max-width: 850px; margin: 40px auto; padding: 0 24px;
+      font: 16px/1.6 system-ui, sans-serif; color: #132438; }
+    button, select, input { padding: 10px; margin: 8px 0; font: inherit; }
+    input { display: block; }
+    #fixture { padding: 20px; background: #edf3f8; border-radius: 10px; }
+    pre { overflow: auto; background: #f2f5f7; padding: 16px; }
+  </style>
+</head>
+<body>
+  <h1>Local form snapshot exporter</h1>
+  <p>This page collects structure from its own controlled examples only.
+    It does not inspect other tabs, read field values or submit forms.</p>
+  <p>Leave the password fields empty. The exported URLs retain their origins,
+    but discard paths, queries, fragments and credentials.</p>
+  <label for="case">Preview a controlled example:</label>
+  <select id="case">
+    <option value="same-site-http">Same-site HTTP</option>
+    <option value="external-https">External HTTPS</option>
+    <option value="button-override">External button override</option>
+    <option value="no-password-forms">No password forms</option>
+    <option value="unassociated-field">Password field without a form</option>
+    <option value="unsupported-action">Unsupported action</option>
+  </select>
+  <div id="fixture"></div>
+  <button id="export" type="button" disabled>Export all 6 examples</button>
+  <p id="status" role="status">Loading exporter...</p>
+  <pre id="preview" hidden></pre>
+  <script type="module" src="/snapshot-export.js"></script>
+</body>
+</html>

@@ -14,6 +14,9 @@ const htmlType = "text/html; charset=utf-8";
 const jsType = "text/javascript; charset=utf-8";
 
 const routes = new Map([
+  ["/snapshot-export", resource("evaluation/node/fixtures/form-snapshot-export.html", htmlType)],
+  ["/snapshot-export.js", resource("evaluation/node/snapshot-export.js", jsType)],
+  ["/sanitize-form-snapshot.js", resource("evaluation/node/sanitize-form-snapshot.js", jsType)],
   ["/popup-demo", resource("evaluation/node/fixtures/form-popup-demo.html", htmlType)],
   [
     "/",
@@ -101,5 +104,6 @@ server.listen(8765, "127.0.0.1", () => {
   console.log("Collector:   http://127.0.0.1:8765/");
   console.log("Integration: http://127.0.0.1:8765/integration");
   console.log("Popup demo:  http://127.0.0.1:8765/popup-demo");
+  console.log("Exporter:    http://127.0.0.1:8765/snapshot-export");
   console.log("Press Ctrl+C to stop.");
 });
