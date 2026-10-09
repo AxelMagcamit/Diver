@@ -1,0 +1,14 @@
+Phishing URL Blocklist / Phishing Hosts Blocklist
+Project: malware-filter, maintained by Ming Di Leom (curben)
+Source: https://gitlab.com/malware-filter/phishing-filter
+Download: https://malware-filter.gitlab.io/malware-filter/phishing-filter-hosts.txt
+License: Creative Commons Attribution-ShareAlike 4.0 International
+License text: phishing-filter-CC-BY-SA-4.0.txt
+Upstream sources identified by the publisher: OpenPhish, IPThreat, PhishTank.
+
+Diver downloads this dataset separately and does not bundle it in its upload package.
+The local cached adaptation normalizes domain names, omits IP/unrecognized hostname
+entries and a limited set of shared-service hostnames, deduplicates entries, and
+performs exact hostname matching. Adapted dataset entries retain CC BY-SA 4.0.
+This dataset license applies to the dataset, separately from Diver's own code.
+Diver is not endorsed by the publisher or its upstream sources.

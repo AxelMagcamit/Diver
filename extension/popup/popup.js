@@ -7,21 +7,30 @@ const element = id => document.getElementById(id);
 
 function renderReputation(reputation) {
   const container = element("findings");
-  let explanation;
-  if (reputation?.status === "listed") {
-    explanation = `Exact hostname match: ${reputation.hostname}. Source: ${reputation.source}. This source focuses on Web3 phishing and scams.`;
-  } else if (reputation?.status === "not-listed") {
-    explanation = "No exact hostname match in the current MetaMask list. This does not establish safety. The source focuses on Web3 threats and this check does not include parent domains or path-based entries.";
-  } else {
-    explanation = "Reputation checking is unavailable. Diver's local rule findings remain available.";
+  const checks = reputation?.checks ?? [reputation ?? { status: "unavailable" }];
+  for (const check of checks) {
+    let explanation;
+    if (check.status === "listed") {
+      explanation = `Exact hostname match: ${check.hostname}. A source report is not an independently confirmed phishing verdict.`;
+    } else if (check.status === "not-listed") {
+      explanation = "No exact hostname match in this source. An unlisted site can still be malicious. Parent domains and path-specific reports are not matched.";
+    } else {
+      explanation = "This reputation source is unavailable. It cannot establish whether this site is listed. Other source and local rule findings remain available.";
+    }
+    if (check.source?.includes("MetaMask")) explanation += " This source focuses on Web3 threats.";
+    if (check.sourceUpdatedAt) explanation += ` Source updated: ${new Date(check.sourceUpdatedAt).toLocaleString()}.`;
+    if (check.fetchedAt) explanation += ` Downloaded: ${new Date(check.fetchedAt).toLocaleString()}.`;
+    if (check.refreshDelayed) explanation += " Refresh is delayed; cached data is still within its use limit.";
+    appendFinding(container, "Domain reputation: " + (check.source ?? "Unavailable"), explanation);
+    if (check.source?.includes("malware-filter")) {
+      const link = document.createElement("a");
+      link.href = "https://gitlab.com/malware-filter/phishing-filter";
+      link.textContent = "Phishing URL Blocklist by malware-filter (CC BY-SA 4.0)";
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      container.lastElementChild.append(link);
+    }
   }
-  if (reputation?.fetchedAt) {
-    explanation += ` List downloaded: ${new Date(reputation.fetchedAt).toLocaleString()}.`;
-  }
-  if (reputation?.refreshDelayed) {
-    explanation += " The refresh is delayed; this cached list is less than 24 hours old.";
-  }
-  appendFinding(container, "Domain reputation", explanation);
 }
 
 function getRiskLevel(score) {

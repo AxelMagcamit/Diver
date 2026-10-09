@@ -13,11 +13,11 @@ $files = @(
   'manifest.json', 'automatic-warning.js', 'automatic-watch.js', 'privacy.html',
   'engine/analyzer.js', 'engine/rules/url-structure.js', 'engine/site-identity.js',
   'engine/form-collector.js', 'engine/form-analyzer.js', 'engine/frame-inspection.js',
-  'engine/warning-policy.js', 'engine/reputation.js',
+  'engine/warning-policy.js', 'engine/reputation.js', 'engine/general-reputation.js', 'engine/hybrid-reputation.js',
   'popup/popup.html', 'popup/popup.css', 'popup/popup.js', 'popup/ocean-motion.js',
   'icons/icon-16.png', 'icons/icon-32.png', 'icons/icon-48.png', 'icons/icon-128.png',
   'vendor/tldts-7.4.16.js', 'vendor/tldts-LICENSE', 'vendor/tldts-core-LICENSE',
-  'vendor/eth-phishing-detect-LICENSE'
+  'vendor/eth-phishing-detect-LICENSE', 'vendor/phishing-filter-NOTICE', 'vendor/phishing-filter-CC-BY-SA-4.0.txt'
 )
 foreach ($relative in $files) {
   if (-not (Test-Path -LiteralPath (Join-Path $extensionRoot $relative) -PathType Leaf)) {

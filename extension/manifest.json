@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Diver",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "minimum_chrome_version": "127",
   "description": "An explainable phishing detection browser extension and analysis toolkit.",
   "permissions": [

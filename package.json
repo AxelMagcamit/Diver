@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "npm run test:engine && npm run test:metrics && npm run test:labeled && npm run test:importer && npm run test:split && npm run test:development && npm run test:thresholds && npm run test:benign-pilot && npm run test:candidate-path && npm run test:candidate-domain && npm run test:site-identity && npm run test:forms && npm run test:page-structures && npm run test:reputation",
+    "test": "npm run test:engine && npm run test:metrics && npm run test:labeled && npm run test:importer && npm run test:split && npm run test:development && npm run test:thresholds && npm run test:benign-pilot && npm run test:candidate-path && npm run test:candidate-domain && npm run test:site-identity && npm run test:forms && npm run test:page-structures && npm run test:reputation && npm run test:general-reputation",
     "evaluate": "node evaluation/node/evaluate.js",
     "test:engine": "node evaluation/node/test-engine.js",
     "test:metrics": "node --test evaluation/node/test-metrics.js",
@@ -33,7 +33,9 @@
     "evaluate:page-structures": "node evaluation/node/evaluate-page-structures.js",
     "test:reputation": "node --test evaluation/node/test-reputation.js",
     "package:extension": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-extension.ps1",
-    "evaluate:release": "node evaluation/node/evaluate-release.js"
+    "evaluate:release": "node evaluation/node/evaluate-release.js",
+    "test:general-reputation": "node --test evaluation/node/test-general-reputation.js",
+    "evaluate:two-source": "node evaluation/node/evaluate-two-source.js"
   },
   "dependencies": {
     "csv-parse": "7.0.3",

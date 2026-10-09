@@ -1,4 +1,4 @@
-import { checkReputation } from "./engine/reputation.js";
+import { checkHybridReputation as checkReputation } from "./engine/hybrid-reputation.js";
 import { analyzeUrl } from "./engine/analyzer.js";
 import { inspectTabFrames } from "./engine/frame-inspection.js";
 import { getAutomaticWarning } from "./engine/warning-policy.js";

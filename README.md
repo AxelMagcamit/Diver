@@ -1,15 +1,15 @@
 # Diver
 
-Diver is a Manifest V3 Chrome extension that gives explainable phishing-risk and credential-handling warnings. It combines local URL and password-form checks with an exact-hostname lookup against a downloaded third-party reputation list.
+Diver is a Manifest V3 Chrome extension that gives explainable phishing-risk and credential-handling warnings. It combines local URL and password-form checks with an exact-hostname lookup against two downloaded third-party reputation lists.
 
-**Release status:** version 0.4.0 is a release candidate. Chrome Web Store publication is pending. The [release review](docs/release-review.md) found limited URL/reputation coverage on historical development data; broad phishing-protection claims are not supported. It is not a guarantee of protection against phishing or malware.
+**Release status:** version 0.5.0 is a release candidate. Chrome Web Store publication is pending. The [release review](docs/release-review.md) found limited URL/reputation coverage on historical development data; broad phishing-protection claims are not supported. It is not a guarantee of protection against phishing or malware.
 
 ## What it does
 
 - Checks URLs for HTTP, IPv4 hostnames, Punycode labels, embedded user information, and long URLs.
 - Inspects declared password-form actions and submit-button overrides in accessible HTTP/HTTPS documents, including embedded frames and open shadow DOM.
 - Reports GET password submissions, HTTP password pages, HTTP form destinations, and cross-site destinations.
-- Matches the top page's exact hostname against MetaMask's public `eth-phishing-detect` list. This source focuses on Web3 phishing and scams.
+- Matches the top page's exact hostname against MetaMask's Web3 list and malware-filter's general Phishing URL Blocklist. Source results remain separate.
 - Opens its popup when a warning rule matches in the visible tab. Repeated scans do not reopen a dismissed warning during the same top-document visit.
 
 Warnings appear after page inspection. Diver does not prevent navigation, block requests, submit forms, or observe actual credential transmissions. Closed shadow DOM, JavaScript submissions, restricted documents, and non-HTTP/HTTPS frame documents remain outside inspection.
@@ -42,23 +42,25 @@ Automatic warnings cover a URL score of at least 60, GET credential exposure, HT
 
 ## Reputation data and limitations
 
-[MetaMask eth-phishing-detect](https://github.com/MetaMask/eth-phishing-detect) supplies the external data. Diver implements its own exact membership checks rather than reproducing the source detector's fuzzy matching.
+[MetaMask eth-phishing-detect](https://github.com/MetaMask/eth-phishing-detect) and [Phishing URL Blocklist by malware-filter](https://gitlab.com/malware-filter/phishing-filter) supply external data. Diver implements its own exact membership checks rather than reproducing the source detector's fuzzy matching.
 
 - Matching uses normalized exact hostnames, not substring matches or parent-domain expansion.
 - Path-specific source entries are omitted rather than turning a reported page into a report against its entire host.
 - An exact allowlist exception affects only reputation matching; Diver's own rule findings remain available.
 - A snapshot refresh is requested after 12 hours, when a supported URL check runs.
 - A failed refresh can retain a snapshot younger than 24 hours. Older data produces `unavailable`, not a safe verdict.
-- Download time is not the date a reported threat was independently verified.
+- The general feed must include a publisher update timestamp within 24 hours. Both its update age and download age are checked. Empty, malformed and oversized updates preserve a usable preceding cache or return unavailable.
+- A provider match still warns if the other provider fails. A partial non-match is reported as unavailable rather than complete coverage.
+- Download/update time is not the date a reported threat was independently verified.
 - An unlisted hostname can still be malicious. A listed hostname can be reported incorrectly or later removed.
 
-The repository preserves the source's original license in `extension/vendor/eth-phishing-detect-LICENSE`, alongside the tldts licenses. Source data is attributed separately from Diver's implementation.
+The repository preserves the source's original license in `extension/vendor/eth-phishing-detect-LICENSE`, alongside the tldts licenses. The general dataset's CC BY-SA 4.0 license and adaptation notice are also preserved; the dataset license is separate from Diver's code. Source data is attributed separately from Diver's implementation.
 
 ## Privacy and permissions
 
 Diver reads page URLs and password-form structure locally. It does not read entered passwords or field values, upload browsing URLs/form snapshots, or maintain browsing-history logs.
 
-It downloads the public domain-list data from GitHub. GitHub can receive ordinary request metadata, such as IP address and browser user-agent; downloaded-list requests omit credentials and referrer information.
+It downloads public list data from GitHub and the malware-filter GitLab Pages site. Those hosting services can receive ordinary request metadata, such as IP address and browser user-agent; downloaded-list requests omit credentials and referrer information.
 
 - HTTP/HTTPS host access permits automatic page and frame inspection.
 - `scripting` runs the collector in isolated document contexts.
@@ -75,7 +77,7 @@ The ocean-motion preference is stored locally. See [PRIVACY.md](PRIVACY.md) for 
 4. Grant the required site access. Refresh previously open tabs after reloading the extension.
 5. Use the popup to inspect findings. Automatic warnings occur only when a warning rule matches in the active, focused tab.
 
-The extension runs without a backend, API key, or npm installation. The first reputation download can take up to 15 seconds. Local rule warnings do not wait for it.
+The extension runs without a backend, API key, or npm installation. First reputation downloads run concurrently, each with a 15-second timeout. Local rule warnings do not wait for it.
 
 ## Development and checks
 
@@ -98,7 +100,9 @@ Open `http://127.0.0.1:8765/credential-demo`. Leave fields empty and do not subm
 
 The historical URL-only development baseline at threshold 30 detected 524 of 78,827 phishing-labeled URLs: recall 0.66%. Source sampling limitations and the full results are documented in [docs/development-baseline.md](docs/development-baseline.md).
 
-That baseline predates the form and reputation layers and does not measure this hybrid release. No overall accuracy percentage is claimed for version 0.4.0. Historical datasets, synthetic fixtures, and functional tests must not be presented as evidence of current real-world protection.
+That baseline predates the form and reputation layers and does not measure this hybrid release. The [two-source checkpoint](docs/two-source-checkpoint.md) measured a historical URL-only warning increase from 18 to 1,721 phishing-labeled records; 2.18% coverage remains limited, and page forms were not scored.
+
+No overall accuracy percentage is claimed for version 0.5.0. Historical datasets, synthetic fixtures, and functional tests must not be presented as evidence of current real-world protection.
 
 Evaluation commands and experiment decisions remain in `docs/` and `evaluation/node/`. Keep the final holdout separate from detector development.
 
