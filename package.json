@@ -32,7 +32,8 @@
     "test:page-structures": "node --test evaluation/node/test-page-structures.js",
     "evaluate:page-structures": "node evaluation/node/evaluate-page-structures.js",
     "test:reputation": "node --test evaluation/node/test-reputation.js",
-    "package:extension": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-extension.ps1"
+    "package:extension": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-extension.ps1",
+    "evaluate:release": "node evaluation/node/evaluate-release.js"
   },
   "dependencies": {
     "csv-parse": "7.0.3",

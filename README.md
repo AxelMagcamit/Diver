@@ -2,7 +2,7 @@
 
 Diver is a Manifest V3 Chrome extension that gives explainable phishing-risk and credential-handling warnings. It combines local URL and password-form checks with an exact-hostname lookup against a downloaded third-party reputation list.
 
-**Release status:** version 0.4.0 is a release candidate. Chrome Web Store publication is pending. It is not a guarantee of protection against phishing or malware.
+**Release status:** version 0.4.0 is a release candidate. Chrome Web Store publication is pending. The [release review](docs/release-review.md) found limited URL/reputation coverage on historical development data; broad phishing-protection claims are not supported. It is not a guarantee of protection against phishing or malware.
 
 ## What it does
 
