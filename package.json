@@ -39,7 +39,8 @@
     "test:page-reputation": "node --test evaluation/node/test-page-reputation.js",
     "evaluate:pages": "node evaluation/node/evaluate-pages.js",
     "test:warning-state": "node --test evaluation/node/test-warning-state.js",
-    "test:navigation-browser": "node evaluation/browser/test-navigation.cjs"
+    "test:navigation-browser": "node evaluation/browser/test-navigation.cjs",
+    "check:docs": "node scripts/check-docs.mjs"
   },
   "dependencies": {
     "csv-parse": "7.0.3",

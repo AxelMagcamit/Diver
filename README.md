@@ -1,8 +1,8 @@
 # Diver
 
-Diver is a Chrome extension I am developing as a student project. It checks website addresses, password forms, and public lists of reported phishing sites. When a warning rule matches, it opens a popup that explains the reason.
+Diver is a Chrome extension that checks website addresses, password forms, and public reports of phishing sites. When a warning rule matches, it opens a popup explaining the finding.
 
-I wanted the warning to be easy to understand. Instead of only showing a score, Diver tells the user what it found, such as a password form using HTTP or a page matching a phishing report.
+Each warning includes a reason, such as a password form using HTTP or a page matching a phishing report. The aim is to give users enough information to understand the risk.
 
 **Current version: 0.6.1.** The extension can run locally, but it is not published on the Chrome Web Store yet. It is still a work in progress, and its current detection coverage is limited.
 
@@ -14,7 +14,7 @@ Diver uses three kinds of checks:
 2. **Password form checks.** It reads the form's structure and declared destination. It does not read what the user types. It checks for problems such as a password form using GET, which can put submitted values in the URL.
 3. **Reported-site checks.** It downloads public lists from MetaMask and malware-filter, then checks addresses against those lists on the user's device. This is called reputation checking.
 
-Using my rules together with outside reputation data makes this a **hybrid** approach. It does not use machine learning.
+Combining local rules with external reputation data makes this a **hybrid** approach. The current version does not use machine learning.
 
 ```text
 Open a page or change its address
@@ -46,7 +46,7 @@ Other automatic warning reasons include a reported host/page match, a password f
 
 ## Why the reported-site checks are careful
 
-[MetaMask's list](https://github.com/MetaMask/eth-phishing-detect) mainly covers Web3 phishing and scams. [malware-filter's list](https://gitlab.com/malware-filter/phishing-filter) adds general phishing reports. These are outside data sources, not lists I created myself.
+[MetaMask's list](https://github.com/MetaMask/eth-phishing-detect) mainly covers Web3 phishing and scams. [malware-filter's list](https://gitlab.com/malware-filter/phishing-filter) adds general phishing reports. Diver uses these external reports and identifies their sources in the popup.
 
 Host checks require an exact hostname match. For example, a report for `example.test` does not automatically report every subdomain. Page checks can match a supported reported path without treating every page on the same service as reported. They use exact hosts and case-sensitive paths; unsupported patterns are skipped and counted.
 
@@ -62,7 +62,7 @@ Website access lets it inspect permitted pages and embedded frames. The `scripti
 
 See the [privacy policy](PRIVACY.md) and the source license notices in `extension/vendor/`.
 
-## Try it locally
+## Installation
 
 1. Use Chrome 127 or newer and open `chrome://extensions`.
 2. Turn on **Developer mode**.
@@ -87,7 +87,7 @@ node evaluation/node/serve-form-tests.js
 
 Open `http://127.0.0.1:8765/credential-demo`. Leave fields empty. The HTTP examples are meant to trigger warnings; no form submission is needed.
 
-## What the tests actually show
+## Evaluation results
 
 The latest historical comparison checked the address and reputation layers. It did not include page content, so it did not measure the password-form layer.
 
@@ -97,20 +97,36 @@ The latest historical comparison checked the address and reputation layers. It d
 | 107,859 legitimate-labeled URLs | 0 |
 | Separate sample of 4,636 valid legitimate-labeled URLs | 0 |
 
-That is about **2.40% of the phishing labels detected** in that development set. It is low, and it is not the extension's overall accuracy. The labels are historical, their current status was not independently checked, and overlap with the public lists is unknown. Zero warnings in the legitimate samples does not mean Diver will never give a wrong warning.
+The address and reputation checks detected about **2.40% of the phishing labels** in that development set. This remains limited coverage and does not represent the extension's overall accuracy. The labels are historical, their current status was not independently checked, and overlap with the public lists is unknown. Zero warnings in these legitimate samples does not guarantee zero future false alarms.
 
 The earlier address-only experiment caught 524 of 78,827 phishing labels at a score threshold of 30. That is a different setting from the automatic warning threshold of 60, so these counts should not be treated as a direct before-and-after comparison.
 
-Code tests and harmless Chrome fixtures passed, including redirects, changing addresses without reloading, and repeat-warning prevention. No live malicious page was opened in these checks. Live testing in a separate VM is still pending. Diver cannot yet be described as dependable protection against phishing in general.
+Code tests and controlled Chrome checks passed, including redirects, address changes without reloading, and repeat-warning prevention. No live malicious page was opened in those checks. VM testing is the next checkpoint; its [results report](docs/testing/vm-test-results.md) remains pending. Current evidence does not establish dependable protection against phishing in general.
 
 ## Project decisions
 
 The main parts are the address rules, form collector, form analyzer, list matching, and automatic warning flow. Checks stay local to avoid uploading browsing addresses. Page reports are kept separate from whole-host reports, and closing a warning does not silence a different reported destination.
 
-Detailed evidence is in the [list checkpoint](docs/two-source-checkpoint.md), [page checkpoint](docs/page-reputation-checkpoint.md), and [navigation checkpoint](docs/navigation-warning-checkpoint.md).
+Detailed evidence is in the [list checkpoint](docs/checkpoints/two-source-checkpoint.md), [page checkpoint](docs/checkpoints/page-reputation-checkpoint.md), and [navigation checkpoint](docs/checkpoints/navigation-warning-checkpoint.md).
 
 ## Release and support
 
-Run `npm run package:extension` on Windows to build the upload package. It includes extension files and license notices, not the research datasets or test pages. See the [publication checklist](docs/public-release.md).
+Run `npm run package:extension` on Windows to build the upload package. It includes extension files and license notices, not the research datasets or test pages. See the [publication checklist](docs/release/public-release.md).
 
 Project: [AxelMagcamit/Diver](https://github.com/AxelMagcamit/Diver). Questions and bugs: [GitHub Issues](https://github.com/AxelMagcamit/Diver/issues). Do not include passwords or private links in public reports.
+
+## Repository layout
+
+| Location | Contents |
+| --- | --- |
+| `extension/` | Chrome extension files, popup, detection rules, and source notices |
+| `evaluation/node/` | Code tests and offline evaluation tools |
+| `evaluation/browser/` | Browser checks using harmless local pages |
+| `datasets/` | Dataset guidance; raw downloads and processed data stay local |
+| `docs/checkpoints/` | Recorded evidence for completed features |
+| `docs/testing/` | VM test plan and results report |
+| `docs/release/` | Publication checklist and draft Store description |
+| `docs/archive/` | Earlier research and experiments, preserved for reference |
+| `scripts/` | Packaging and documentation checks |
+
+Start with the [documentation index](docs/README.md). After VM testing, update the results report, record any fixes, and review the release checklist. Run `npm run check:docs` to check local document links and confirm preparation notes are not included in tracked documentation.

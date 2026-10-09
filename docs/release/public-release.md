@@ -47,8 +47,8 @@ Lists download on first use. A failed source is shown as unavailable. No extensi
 
 - [Chrome's publication guide](https://developer.chrome.com/docs/webstore/publish)
 - [Chrome's privacy policies](https://developer.chrome.com/docs/webstore/program-policies/privacy)
-- [Current page-check evidence](page-reputation-checkpoint.md)
-- [Warning delivery fix](navigation-warning-checkpoint.md)
-- [Earlier two-list comparison](two-source-checkpoint.md)
+- [Current page-check evidence](../checkpoints/page-reputation-checkpoint.md)
+- [Warning delivery fix](../checkpoints/navigation-warning-checkpoint.md)
+- [Earlier two-list comparison](../checkpoints/two-source-checkpoint.md)
 
 The earlier 0.4.0 review is kept as historical evidence. It is not a certification of the current version.

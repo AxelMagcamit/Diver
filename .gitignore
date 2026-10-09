@@ -12,3 +12,6 @@ evaluation/results/
 
 # Private preparation notes
 /docs/interview-guide.md
+
+# Raw VM evidence stays local; publish redacted summaries only.
+/docs/testing/local/
