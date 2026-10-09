@@ -6,3 +6,6 @@ evaluation/results/
 # Raw downloads and derived datasets stay local.
 /datasets/raw/
 /datasets/processed/
+
+# Generated extension upload packages.
+/release/

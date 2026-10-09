@@ -5,6 +5,25 @@ import { getAutomaticWarning } from "../engine/warning-policy.js";
 
 const element = id => document.getElementById(id);
 
+function renderReputation(reputation) {
+  const container = element("findings");
+  let explanation;
+  if (reputation?.status === "listed") {
+    explanation = `Exact hostname match: ${reputation.hostname}. Source: ${reputation.source}. This source focuses on Web3 phishing and scams.`;
+  } else if (reputation?.status === "not-listed") {
+    explanation = "No exact hostname match in the current MetaMask list. This does not establish safety. The source focuses on Web3 threats and this check does not include parent domains or path-based entries.";
+  } else {
+    explanation = "Reputation checking is unavailable. Diver's local rule findings remain available.";
+  }
+  if (reputation?.fetchedAt) {
+    explanation += ` List downloaded: ${new Date(reputation.fetchedAt).toLocaleString()}.`;
+  }
+  if (reputation?.refreshDelayed) {
+    explanation += " The refresh is delayed; this cached list is less than 24 hours old.";
+  }
+  appendFinding(container, "Domain reputation", explanation);
+}
+
 function getRiskLevel(score) {
   if (score >= 60) return "High risk";
   if (score >= 30) return "Suspicious";
@@ -254,9 +273,15 @@ async function initializeDiver() {
     }
 
     const formAnalysis = await inspectPage(tab);
+    renderWarning(getAutomaticWarning(result, formAnalysis));
+    let reputation;
+    try {
+      reputation = await chrome.runtime.sendMessage({ type: "DIVER_REPUTATION_CHECK", url: tab.url });
+    } catch { reputation = { status: "unavailable" }; }
+    renderReputation(reputation);
 
     renderWarning(
-      getAutomaticWarning(result, formAnalysis)
+      getAutomaticWarning(result, formAnalysis, reputation)
     );
   } catch {
     element("site-identity").hidden = true;

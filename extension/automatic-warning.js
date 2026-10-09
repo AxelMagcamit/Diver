@@ -1,3 +1,4 @@
+import { checkReputation } from "./engine/reputation.js";
 import { analyzeUrl } from "./engine/analyzer.js";
 import { inspectTabFrames } from "./engine/frame-inspection.js";
 import { getAutomaticWarning } from "./engine/warning-policy.js";
@@ -31,9 +32,15 @@ async function scan(tabId) {
       analysis
     } = await inspectTabFrames(tab);
 
+    const urlResult = analyzeUrl(tab.url);
+    const reputation = await checkReputation(tab.url, {
+      waitForRefresh: !getAutomaticWarning(urlResult, analysis).warn
+    });
+
     const warning = getAutomaticWarning(
-      analyzeUrl(tab.url),
-      analysis
+      urlResult,
+      analysis,
+      reputation
     );
 
     if (!warning.warn) return;
@@ -117,6 +124,17 @@ async function scan(tabId) {
 
 chrome.runtime.onMessage.addListener(
   (message, sender, respond) => {
+    if (sender.id !== chrome.runtime.id) return;
+    if (message?.type === "DIVER_REPUTATION_CHECK") {
+      if (typeof message.url !== "string" || message.url.length > 8192) {
+        respond({ status: "unsupported" });
+        return;
+      }
+      checkReputation(message.url).then(respond).catch(() => {
+        respond({ status: "unavailable" });
+      });
+      return true;
+    }
     if (
       message?.type !== "DIVER_WARNING_RESCAN" ||
       sender.id !== chrome.runtime.id ||

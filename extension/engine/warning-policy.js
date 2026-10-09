@@ -1,5 +1,8 @@
-export function getAutomaticWarning(urlResult, formAnalysis) {
+export function getAutomaticWarning(urlResult, formAnalysis, reputation = null) {
   const reasons = new Set();
+  if (reputation?.status === "listed") {
+    reasons.add("This exact hostname is listed by MetaMask eth-phishing-detect. The source focuses on Web3 phishing and scams; a report can be mistaken or later removed.");
+  }
 
   if (
     urlResult?.valid &&

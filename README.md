@@ -1,244 +1,111 @@
 # Diver
 
-Diver is a Chrome extension that checks URLs for suspicious structural
-signals. Its popup and Node.js evaluation runner share the same
-JavaScript detection engine.
+Diver is a Manifest V3 Chrome extension that gives explainable phishing-risk and credential-handling warnings. It combines local URL and password-form checks with an exact-hostname lookup against a downloaded third-party reputation list.
 
-## Current rules
+**Release status:** version 0.4.0 is a release candidate. Chrome Web Store publication is pending. It is not a guarantee of protection against phishing or malware.
 
-| Rule | Signal | Score |
-|---|---|---:|
-| URL-001 | HTTP instead of HTTPS | 10 |
-| URL-002 | IPv4 address used as hostname | 20 |
-| URL-003 | Punycode domain label | 20 |
-| URL-004 | User information embedded in the URL | 20 |
-| URL-005 | Parsed URL longer than 150 characters | 10 |
+## What it does
 
-Matching scores are added together and capped at 100.
+- Checks URLs for HTTP, IPv4 hostnames, Punycode labels, embedded user information, and long URLs.
+- Inspects declared password-form actions and submit-button overrides in accessible HTTP/HTTPS documents, including embedded frames and open shadow DOM.
+- Reports GET password submissions, HTTP password pages, HTTP form destinations, and cross-site destinations.
+- Matches the top page's exact hostname against MetaMask's public `eth-phishing-detect` list. This source focuses on Web3 phishing and scams.
+- Opens its popup when a warning rule matches in the visible tab. Repeated scans do not reopen a dismissed warning during the same top-document visit.
 
-These scores are provisional. A matching signal does not prove phishing,
-and a score of zero does not guarantee safety.
+Warnings appear after page inspection. Diver does not prevent navigation, block requests, submit forms, or observe actual credential transmissions. Closed shadow DOM, JavaScript submissions, restricted documents, and non-HTTP/HTTPS frame documents remain outside inspection.
 
-## Load the Chrome extension
+## How the hybrid detector works
 
-1. Open chrome://extensions/ in Chrome.
-2. Enable Developer mode.
-3. Click Load unpacked.
-4. Select this project's extension folder.
-5. Open a webpage and click the Diver extension icon.
+```text
+Page navigation / relevant form change
+                 |
+       URL and form inspection
+                 |
+     Local hostname reputation lookup
+                 |
+         Shared warning policy
+                 |
+  Visible tab -> attributed warning popup
+```
 
-After editing extension files, reload Diver on the extensions page.
+The URL score is the sum of five provisional rule weights, capped at 100. It is not a probability. Form findings and reputation results are separate evidence and do not change that score.
 
-## Run the tests
+| URL rule | Signal | Points |
+| --- | --- | ---: |
+| URL-001 | HTTP | 10 |
+| URL-002 | IPv4 hostname | 20 |
+| URL-003 | Punycode label | 20 |
+| URL-004 | User information in URL | 20 |
+| URL-005 | URL longer than 150 characters | 10 |
 
-Install Node.js, then open a terminal in the project root:
+Automatic warnings cover a URL score of at least 60, GET credential exposure, HTTP password pages, eligible password fields declaring HTTP submission, the existing cross-site HTTP condition, or an exact reputation-list match. These rules indicate reported threats or declared risks; they do not prove phishing.
+
+## Reputation data and limitations
+
+[MetaMask eth-phishing-detect](https://github.com/MetaMask/eth-phishing-detect) supplies the external data. Diver implements its own exact membership checks rather than reproducing the source detector's fuzzy matching.
+
+- Matching uses normalized exact hostnames, not substring matches or parent-domain expansion.
+- Path-specific source entries are omitted rather than turning a reported page into a report against its entire host.
+- An exact allowlist exception affects only reputation matching; Diver's own rule findings remain available.
+- A snapshot refresh is requested after 12 hours, when a supported URL check runs.
+- A failed refresh can retain a snapshot younger than 24 hours. Older data produces `unavailable`, not a safe verdict.
+- Download time is not the date a reported threat was independently verified.
+- An unlisted hostname can still be malicious. A listed hostname can be reported incorrectly or later removed.
+
+The repository preserves the source's original license in `extension/vendor/eth-phishing-detect-LICENSE`, alongside the tldts licenses. Source data is attributed separately from Diver's implementation.
+
+## Privacy and permissions
+
+Diver reads page URLs and password-form structure locally. It does not read entered passwords or field values, upload browsing URLs/form snapshots, or maintain browsing-history logs.
+
+It downloads the public domain-list data from GitHub. GitHub can receive ordinary request metadata, such as IP address and browser user-agent; downloaded-list requests omit credentials and referrer information.
+
+- HTTP/HTTPS host access permits automatic page and frame inspection.
+- `scripting` runs the collector in isolated document contexts.
+- `storage` caches provider list data and its download timestamp.
+- `activeTab` supports user-invoked access where Chrome permits it.
+
+The ocean-motion preference is stored locally. See [PRIVACY.md](PRIVACY.md) for the full policy, also available inside the extension.
+
+## Run locally
+
+1. Open `chrome://extensions` in Chrome 127 or newer.
+2. Enable Developer mode and choose **Load unpacked**.
+3. Select this repository's `extension` directory.
+4. Grant the required site access. Refresh previously open tabs after reloading the extension.
+5. Use the popup to inspect findings. Automatic warnings occur only when a warning rule matches in the active, focused tab.
+
+The extension runs without a backend, API key, or npm installation. The first reputation download can take up to 15 seconds. Local rule warnings do not wait for it.
+
+## Development and checks
 
 ```powershell
-npm install
+npm ci
 npm test
 ```
 
-This command runs 22 engine cases covering the five rules, combined scores,
-invalid input, URL-length boundaries, and unsupported protocols, followed by
-10 metrics tests covering known counts, empty inputs, and undefined rates,
-9 labeled-workflow tests, and 9 CSV-import tests.
+The Node suite covers URL rules, form analysis, domain identity, reputation matching/cache failures, and evaluation utilities. Browser release checks separately exercise real extension APIs and popup behavior. Passing functional tests does not measure detection accuracy.
 
-You can also run each group separately:
+For controlled local form fixtures:
 
 ```powershell
-npm run test:engine
-npm run test:metrics
-npm run test:labeled
+node evaluation/node/serve-form-tests.js
 ```
 
-The offline import tools use the pinned csv-parse package. Install dependencies
-with npm install (or npm ci for the exact lockfile). The browser extension
-continues to run without npm packages.
+Open `http://127.0.0.1:8765/credential-demo`. Leave fields empty and do not submit credentials. HTTP fixtures intentionally trigger transport warnings.
 
-## Run the default evaluation
+## Evaluation evidence
 
-From the project root, run:
+The historical URL-only development baseline at threshold 30 detected 524 of 78,827 phishing-labeled URLs: recall 0.66%. Source sampling limitations and the full results are documented in [docs/development-baseline.md](docs/development-baseline.md).
 
-```powershell
-npm run evaluate
-```
+That baseline predates the form and reputation layers and does not measure this hybrid release. No overall accuracy percentage is claimed for version 0.4.0. Historical datasets, synthetic fixtures, and functional tests must not be presented as evidence of current real-world protection.
 
-The default input file is:
+Evaluation commands and experiment decisions remain in `docs/` and `evaluation/node/`. Keep the final holdout separate from detector development.
 
-evaluation/node/sample-urls.json
+## Release and support
 
-## Evaluate a different input file
+The Windows packaging command is `npm run package:extension`. It includes runtime files and notices, and excludes datasets, development fixtures, tests, and source maps. A publication checklist is in [docs/public-release.md](docs/public-release.md).
 
-Supply a JSON file containing an array of URL strings:
+Project: [AxelMagcamit/Diver](https://github.com/AxelMagcamit/Diver). Report bugs or ask for support through [GitHub Issues](https://github.com/AxelMagcamit/Diver/issues). Do not include passwords, private URLs, or authentication tokens in public reports.
 
-```powershell
-npm run evaluate -- evaluation/node/extra-urls.json
-```
-
-Relative input paths are resolved from the terminal's current folder.
-For paths containing spaces, wrap the path in double quotes.
-
-The runner analyzes URL strings without visiting websites.
-
-## Evaluation report
-
-The runner displays a table and saves the full results to:
-
-evaluation/results/latest-report.json
-
-The report includes the generation time, input file path, summary,
-and full analysis results.
-
-Each successful run replaces the previous latest report.
-Generated reports are ignored by Git.
-
-In the table, Valid means the engine could parse the URL. Supported means
-it uses HTTP or HTTPS and can be analyzed. Neither means the website is safe.
-
-Invalid and unsupported inputs display N/A and store a null score in JSON.
-Unsupported URLs remain valid URLs, but have supported set to false and no findings.
-The summary separates supported URLs, unsupported URLs, and invalid inputs.
-
-Run the mixed-protocol example with:
-
-```powershell
-npm run evaluate -- evaluation/node/protocol-urls.json
-```
-
-The popup and evaluator both use the shared engine's support decision.
-
-## Project structure
-
-- extension/engine/ — shared detection engine and rules
-- extension/popup/ — Chrome popup interface
-- evaluation/node/ — tests, sample inputs, and evaluation runner
-- evaluation/results/ — generated reports
-
-## Current limitations
-
-The sample evaluation checks engine behavior; it does not measure
-phishing detection accuracy. No labeled dataset evaluation has been
-performed yet.
-
-## Synthetic metrics demonstration
-
-```powershell
-npm run demo:metrics
-```
-
-This demonstrates precision, recall, false-positive rate, F1, and accuracy using
-invented outcome counts. It does not analyze URLs, run the detection engine,
-write an evaluation report, or measure Diver's phishing detection accuracy.
-
-The calculator is in evaluation/node/metrics.js. Supply non-negative integer
-counts named tp, fp, fn, and tn. It returns unrounded rates from 0 to 1 and null
-when a denominator is zero. The demo formats rates as percentages and null as N/A.
-Only independently labeled, eligible results should feed a future real evaluation;
-coverage, exclusion counts, and threshold metadata belong in that future runner.
-See docs/evaluation-plan.md for the evaluation protocol.
-
-## Synthetic labeled workflow
-
-```powershell
-npm run demo:labeled
-```
-
-This runs the shared engine on example URLs paired with deliberately invented
-labels, applies the default threshold of 30, and calculates outcome counts and
-metrics. It verifies the workflow, not real phishing accuracy. No websites are
-visited or datasets downloaded. The fixture is in
-evaluation/node/fixtures/synthetic-labeled.json.
-
-At threshold 30 it has 13 input records, 6 evaluated records, and 7 exclusions.
-Expected counts: TP=2, FP=1, FN=1, TN=2. These are synthetic demonstration results.
-
-An optional integer threshold from 0 to 100 changes this demo only:
-
-```powershell
-npm run demo:labeled -- 40
-```
-
-Results are saved separately to evaluation/results/synthetic-labeled-report.json,
-marked synthetic. Each successful demo run replaces that synthetic report; the
-ordinary latest-report.json is untouched.
-
-The reusable evaluator accepts records with URL strings and labels. Only exact
-lowercase phishing and legitimate labels are recognized. Missing or other string
-labels are excluded. It preserves the original URL and any extra record metadata.
-Conflicting known labels quarantine all records for that exact URL. Otherwise,
-exact URL duplicates are removed, preferring a known label over an unknown label.
-Each remaining record is checked for invalid URL, unsupported protocol, then
-unknown label, in that order. Every input belongs to one outcome or one exclusion.
-Unexpected engine errors stop evaluation.
-
-This synthetic demo does not implement source provenance validation or dataset
-splitting. Those are required before a real quality evaluation, as described in
-docs/evaluation-plan.md.
-
-
-## CSV import preparation
-
-Run `npm run demo:import` to check the importer with three invented records.
-It downloads nothing and does not measure accuracy. See datasets/README.md
-for local folder layout, provenance fields, and the real-file import command.
-The importer has also processed the original PhiUSIIL CSV after schema and label
-mapping inspection. See docs/phiusiil-import-checkpoint.md for the import audit.
-
-## Domain-separated split
-
-Run `npm run test:split` to verify domain grouping and deterministic partitioning.
-To reproduce the split into a NEW output directory:
-
-```powershell
-npm run split:dataset -- datasets/processed/phiusiil.json datasets/processed/phiusiil-split-v1
-```
-
-The command refuses an existing output directory. It produces development.json,
-holdout.json, exclusions.json, and manifest.json. No detection scores are computed.
-The fixed seed assigns whole domain groups to approximately 80% development and
-20% holdout. See docs/phiusiil-split-checkpoint.md for counts and limitations.
-
-## Development baseline
-
-Run `npm run evaluate:development` to evaluate the fixed development partition at
-threshold 30 using the shared engine. The command verifies the input checksum
-against the split manifest and accepts no alternative input or threshold.
-Each run saves a timestamped report in evaluation/results/, including all outcomes,
-source provenance and implementation hashes. No websites are visited.
-See docs/development-baseline.md for the first results and their limitations.
-
-Compare the six planned thresholds using a saved development report:
-
-```powershell
-npm run compare:thresholds -- evaluation/results/development-baseline-2026-10-08T03-35-35-971Z.json
-```
-
-This reuses saved scores and makes no popup changes. See
-docs/development-thresholds.md for the comparison and score distribution.
-
-Audit URL shapes and fixed samples offline:
-
-```powershell
-npm run audit:development -- evaluation/results/development-baseline-2026-10-08T03-35-35-971Z.json
-```
-
-See docs/development-audit.md. The legitimate development examples are exclusively
-HTTPS www homepages; their zero false alarms do not represent ordinary browsing.
-
-## Synthetic limitation challenges
-
-Run `npm run demo:challenges` to check ten invented scenarios against the shared
-engine. The demo illustrates possible false alerts and missed threats, including
-identical URLs with different imagined page content. It measures no real-world
-accuracy and visits no websites. See docs/synthetic-challenges.md.
-
-## Benign pilot audit
-
-Run `npm run evaluate:benign-pilot` after preparing the pinned PhreshPhish pilot.
-It checks URL shapes, exclusions, development-domain overlap and false alerts at
-six thresholds. It does not estimate precision or recall or inspect holdout data.
-See docs/benign-pilot-results.md for results and limitations.
-
-For the expanded ten-shard pilot, run
-`npm run evaluate:benign-pilot -- --expanded`.
-See docs/benign-multishard-results.md for sampling, reproduction and limitations.
+Privacy policy: [PRIVACY.md](PRIVACY.md). Version 0.4.0 remains an unpublished release candidate until Chrome Web Store review and publication.
