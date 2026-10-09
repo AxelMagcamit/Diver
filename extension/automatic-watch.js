@@ -1,7 +1,5 @@
 (() => {
-  const state = globalThis.__diverWarningState ??= {
-    warned: false
-  };
+  const state = globalThis.__diverWarningState ??= {};
 
   if (state.watching) return;
   state.watching = true;

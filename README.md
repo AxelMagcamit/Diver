@@ -2,7 +2,7 @@
 
 Diver is a Manifest V3 Chrome extension that gives explainable phishing-risk and credential-handling warnings. It combines local URL and password-form checks with local hostname and page-pattern checks against downloaded reputation data from two publishers.
 
-**Release status:** version 0.6.0 is a release candidate. Chrome Web Store publication is pending. The [release review](docs/release-review.md) found limited URL/reputation coverage on historical development data; broad phishing-protection claims are not supported. It is not a guarantee of protection against phishing or malware.
+**Release status:** version 0.6.1 is a release candidate. Chrome Web Store publication is pending. The [release review](docs/release-review.md) found limited URL/reputation coverage on historical development data; broad phishing-protection claims are not supported. It is not a guarantee of protection against phishing or malware.
 
 ## What it does
 
@@ -10,7 +10,7 @@ Diver is a Manifest V3 Chrome extension that gives explainable phishing-risk and
 - Inspects declared password-form actions and submit-button overrides in accessible HTTP/HTTPS documents, including embedded frames and open shadow DOM.
 - Reports GET password submissions, HTTP password pages, HTTP form destinations, and cross-site destinations.
 - Matches the top page's exact hostname against MetaMask's Web3 list and malware-filter's general Phishing URL Blocklist. Source results remain separate. It also checks supported malware-filter page patterns.
-- Opens its popup when a warning rule matches in the visible tab. Repeated scans do not reopen a dismissed warning during the same top-document visit.
+- Opens its popup when a warning rule matches in the visible tab. Repeated scans of the same warned destination do not reopen a dismissed warning during the same top-document visit. A different path or query can warn without a full page reload; fragment-only changes remain suppressed.
 
 Warnings appear after page inspection. Diver does not prevent navigation, block requests, submit forms, or observe actual credential transmissions. Closed shadow DOM, JavaScript submissions, restricted documents, and non-HTTP/HTTPS frame documents remain outside inspection.
 
@@ -116,4 +116,4 @@ Privacy policy: [PRIVACY.md](PRIVACY.md). Version 0.4.0 remains an unpublished r
 
 ### Page reputation (0.6.0)
 
-Diver now checks supported page patterns from the same malware-filter publisher, so a reported page on shared hosting can warn without treating every page on that hostname as reported. Matching stays on-device and uses exact hosts, literal case-sensitive paths/query constraints and the declared ending separator. Unsupported patterns, subdomain expansion and nonstandard ports are omitted. This is a conservative subset of the feed, not a complete Adblock implementation or an independent third reputation publisher. See [page-reputation checkpoint](docs/page-reputation-checkpoint.md).
+Diver now checks supported page patterns from the same malware-filter publisher, so a reported page on shared hosting can warn without treating every page on that hostname as reported. Matching stays on-device and uses exact hosts, literal case-sensitive paths/query constraints and the declared ending separator. Unsupported patterns, subdomain expansion and nonstandard ports are omitted. This is a conservative subset of the feed, not a complete Adblock implementation or an independent third reputation publisher. See [page-reputation checkpoint](docs/page-reputation-checkpoint.md). The [navigation reliability checkpoint](docs/navigation-warning-checkpoint.md) documents the 0.6.1 suppression fix and redirect checks.

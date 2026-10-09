@@ -1,3 +1,4 @@
+import { claimWarning, releaseWarning } from "./engine/warning-state.js";
 import { checkHybridReputation as checkReputation } from "./engine/hybrid-reputation.js";
 import { analyzeUrl } from "./engine/analyzer.js";
 import { inspectTabFrames } from "./engine/frame-inspection.js";
@@ -10,6 +11,7 @@ async function scan(tabId) {
   generations.set(tabId, generation);
 
   let claimedDocumentId;
+  const claimToken = crypto.randomUUID();
 
   try {
     const tab = await chrome.tabs.get(tabId);
@@ -67,16 +69,8 @@ async function scan(tabId) {
         documentIds: [topDocumentId]
       },
       world: "ISOLATED",
-      func: () => {
-        const state = globalThis.__diverWarningState ??= {
-          warned: false
-        };
-
-        if (state.warned) return false;
-
-        state.warned = true;
-        return true;
-      }
+      func: claimWarning,
+      args: [tab.url, claimToken]
     });
 
     if (!claims[0]?.result) return;
@@ -109,11 +103,8 @@ async function scan(tabId) {
             documentIds: [claimedDocumentId]
           },
           world: "ISOLATED",
-          func: () => {
-            if (globalThis.__diverWarningState) {
-              globalThis.__diverWarningState.warned = false;
-            }
-          }
+          func: releaseWarning,
+          args: [claimToken]
         });
       } catch {
         // The document may already be gone.

@@ -1,6 +1,6 @@
 # Diver public MVP release checkpoint
 
-## Current scope: version 0.6.0
+## Current scope: version 0.6.1
 
 URL structure checks, declared password-form handling, accessible frames/open shadow DOM, exact top-hostname and supported page-pattern reputation checks from two publishers, and selective automatic warning popups. This is an explainable risk-warning tool. It does not block navigation or guarantee protection.
 
@@ -9,7 +9,7 @@ URL structure checks, declared password-form handling, accessible frames/open sh
 - Existing Node suite passed after the hybrid code was applied.
 - Real Chrome for Testing loaded the actual extension service worker.
 - A synthetic listed `.test` hostname opened the actual action popup and rendered source attribution.
-- Dismissing the popup suppressed repeat warnings on the same top document.
+- Dismissing the popup suppresses repeat warnings for that destination. A different path/query in the same document can warn; fragment changes alone do not reopen it. HTTP/JavaScript redirects and history URL changes passed local Chrome checks.
 - A routed cross-origin iframe triggered the GET warning with its frame context.
 - Reputation checks exercised boundaries, allowlist precedence, malformed updates, retry backoff, expiry, and privacy of download requests.
 

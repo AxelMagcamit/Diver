@@ -1,6 +1,6 @@
 # Diver privacy policy
 
-Effective date: 9 October 2026. Applies to the version 0.6.0 release candidate.
+Effective date: 9 October 2026. Applies to the version 0.6.1 release candidate.
 
 ## Purpose
 
